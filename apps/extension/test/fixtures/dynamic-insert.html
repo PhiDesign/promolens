@@ -1,0 +1,14 @@
+<!-- Sanitized synthetic fixture: feed container into which a test inserts a post later. Not live Reddit content. -->
+<shreddit-app>
+<shreddit-feed id="feed">
+<shreddit-post id="t3_dyn000" permalink="/r/webdev/comments/dyn000/first_post/" post-title="First post already on the page" author="alice" subreddit-name="webdev" score="10" comment-count="1" post-type="text" domain="self.webdev">
+  <a slot="title" href="/r/webdev/comments/dyn000/first_post/">First post already on the page</a>
+  <a slot="text-body" href="/r/webdev/comments/dyn000/first_post/"><div>Just a normal question about CSS grid gaps.</div></a>
+</shreddit-post>
+</shreddit-feed>
+</shreddit-app>
+<template id="late-post">
+<shreddit-post id="t3_dyn001" permalink="/r/webdev/comments/dyn001/late_post/" post-title="Post inserted by infinite scroll" author="bob" subreddit-name="webdev" score="3" comment-count="0" post-type="link" domain="example.com" content-href="https://example.com/tool?ref=bob">
+  <a slot="title" href="/r/webdev/comments/dyn001/late_post/">Post inserted by infinite scroll</a>
+</shreddit-post>
+</template>

@@ -1,0 +1,18 @@
+{
+  "name": "@promolens/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local PromoLens analysis API (mock provider by default).",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "build": "esbuild src/server.ts --bundle --platform=node --target=node20 --format=esm --outfile=dist/server.js --banner:js=\"import { createRequire } from 'module'; const require = createRequire(import.meta.url);\"",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "eval": "tsx eval/run.ts"
+  },
+  "dependencies": {
+    "@promolens/shared": "*",
+    "zod": "^3.23.8"
+  }
+}

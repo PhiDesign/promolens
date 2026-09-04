@@ -1,0 +1,36 @@
+{
+  "name": "promolens",
+  "version": "0.2.0",
+  "private": true,
+  "description": "PromoLens - a Chrome extension that estimates how likely Reddit posts are to be promotional, with visible evidence and uncertainty.",
+  "license": "MIT",
+  "workspaces": [
+    "packages/shared",
+    "apps/api",
+    "apps/extension"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "npm run build --workspace=apps/extension && npm run build --workspace=apps/api",
+    "build:extension": "npm run build --workspace=apps/extension",
+    "build:api": "npm run build --workspace=apps/api",
+    "dev:api": "npm run dev --workspace=apps/api",
+    "start:api": "npm run start --workspace=apps/api",
+    "typecheck": "tsc -p packages/shared/tsconfig.json --noEmit && tsc -p apps/api/tsconfig.json --noEmit && tsc -p apps/extension/tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "npm run typecheck && npm run test && npm run build",
+    "eval": "npm run eval --workspace @promolens/api --"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.270",
+    "@types/node": "^22.7.0",
+    "esbuild": "^0.25.0",
+    "jsdom": "^26.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.2.0"
+  }
+}

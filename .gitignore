@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Secrets and local configuration - never commit these
+.env
+.env.*
+!.env.example
+
+# Editor and OS noise
+.DS_Store
+.vscode/
+.idea/
+*.log
+
+# Test output
+coverage/
+
+# Evaluation: your own labelled posts and generated reports stay local
+apps/api/eval/local/
+apps/api/eval/results/

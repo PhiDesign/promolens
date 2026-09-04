@@ -1,0 +1,495 @@
+{
+  "$comment": "Synthetic, hand-labelled seed cases. No live Reddit content. Expected ranges are the label a careful human reviewer would accept; disclosure is the expected status. Add your own real posts under apps/api/eval/local/*.json (git-ignored) using the same shape.",
+  "cases": [
+    {
+      "id": "organic-advice",
+      "description": "Genuine advice, limitations, no product, no links",
+      "post": {
+        "title": "What actually helped my sleep after years of trying everything",
+        "body": "Not selling anything, just what worked. Consistent wake time mattered more than bedtime. Cutting caffeine after noon helped but took two weeks to notice. Melatonin did nothing for me and made mornings worse. Blackout curtains were the single best change. Your mileage may vary - talk to a doctor if it has been months.",
+        "subreddit": "sleep",
+        "upvotes": 140,
+        "commentsCount": 32,
+        "ageHours": 9
+      },
+      "expected": {
+        "min": 0,
+        "max": 19,
+        "disclosure": "unknown"
+      }
+    },
+    {
+      "id": "organic-advice-viral",
+      "description": "Same text as organic-advice with viral numbers; score must not change",
+      "post": {
+        "title": "What actually helped my sleep after years of trying everything",
+        "body": "Not selling anything, just what worked. Consistent wake time mattered more than bedtime. Cutting caffeine after noon helped but took two weeks to notice. Melatonin did nothing for me and made mornings worse. Blackout curtains were the single best change. Your mileage may vary - talk to a doctor if it has been months.",
+        "subreddit": "sleep",
+        "upvotes": 41000,
+        "commentsCount": 2600,
+        "ageHours": 6
+      },
+      "expected": {
+        "min": 0,
+        "max": 19,
+        "disclosure": "unknown"
+      },
+      "invariantWith": "organic-advice"
+    },
+    {
+      "id": "founder-transparent",
+      "description": "Founder says so, links, mentions a limitation",
+      "post": {
+        "title": "I built a small habit tracker - looking for honest feedback",
+        "body": "I'm the founder of HabitLoop. It is a simple daily tracker with streaks and a weekly review. You can try it at https://habitloop.app. Known limitation: no Android app yet and sync is manual. Happy to answer questions.",
+        "subreddit": "productivity",
+        "links": [
+          "https://habitloop.app"
+        ],
+        "outboundDomains": [
+          "habitloop.app"
+        ],
+        "upvotes": 85,
+        "commentsCount": 40,
+        "ageHours": 12
+      },
+      "expected": {
+        "min": 75,
+        "max": 100,
+        "disclosure": "clear"
+      }
+    },
+    {
+      "id": "founder-advice-request",
+      "description": "Founder asking how to get users; describes product; no link, no ask",
+      "post": {
+        "title": "Got into the app store. Now what? Technical founder, no idea how to get users.",
+        "body": "Six months ago I started building a tool for myself. That turned into CallBuddy, a desktop app from my company. It passed store certification this week. It runs locally, never auto-suggests, and stays invisible in screen shares. Now the honest part: I have no audience. The app is live, free during early access, one-click install from the store. People who've done this before: where did your first 100 users actually come from? What would you do this week with no budget?",
+        "subreddit": "SaaS",
+        "upvotes": 30,
+        "commentsCount": 18,
+        "ageHours": 5
+      },
+      "expected": {
+        "min": 30,
+        "max": 65,
+        "disclosure": "clear"
+      }
+    },
+    {
+      "id": "memoir-launch-with-code",
+      "description": "Long personal story ending in a link and a discount code; disclosed",
+      "post": {
+        "title": "How I quit competitive rowing, then built the tool I needed",
+        "body": "This is not one of those 'built it in a weekend' posts. Two years, both of us working full time. I rowed at national level until an injury ended it, and I struggled badly afterwards. A former coach who became a counsellor and I started talking about what athletes are never prepared for. That turned into a project. We have tested it with a small group of athletes. Honest feedback would help a lot: https://rowmindapp.com - you can use code ATHLETE20. Please don't be nice just to be nice.",
+        "subreddit": "SaaS",
+        "links": [
+          "https://rowmindapp.com"
+        ],
+        "outboundDomains": [
+          "rowmindapp.com"
+        ],
+        "upvotes": 210,
+        "commentsCount": 55,
+        "ageHours": 3
+      },
+      "expected": {
+        "min": 75,
+        "max": 100,
+        "disclosure": "clear"
+      }
+    },
+    {
+      "id": "memoir-launch-undisclosed",
+      "description": "Same shape as memoir-launch-with-code but written as a grateful user; no disclosure",
+      "post": {
+        "title": "How I got through quitting competitive rowing",
+        "body": "An injury ended my rowing career and I struggled badly afterwards for two years. What finally helped was a small app a friend showed me that walks you through the parts of sport nobody prepares you for. I used it daily. If you are going through it: https://rowmindapp.com - the code ATHLETE20 still works I think. Hope it helps someone.",
+        "subreddit": "sports",
+        "links": [
+          "https://rowmindapp.com"
+        ],
+        "outboundDomains": [
+          "rowmindapp.com"
+        ],
+        "upvotes": 190,
+        "commentsCount": 48,
+        "ageHours": 4
+      },
+      "expected": {
+        "min": 65,
+        "max": 100,
+        "disclosure": "missing"
+      }
+    },
+    {
+      "id": "workflow-undisclosed",
+      "description": "Multi-tool workflow, only the obscure tool linked with a referral parameter",
+      "post": {
+        "title": "My exact content workflow that took me from 0 to 50k views a month",
+        "body": "Step 1: research topics in Google Trends. Step 2: outline in Notion. Step 3: run the draft through Rankforge (https://rankforge.io/?ref=maya) which fixes search intent, adds internal links and rewrites the intro - this is the step that changed everything. Step 4: publish on WordPress. Step 5: schedule on Buffer. Rankforge is the part I would not skip.",
+        "subreddit": "content_marketing",
+        "links": [
+          "https://rankforge.io/?ref=maya"
+        ],
+        "outboundDomains": [
+          "rankforge.io"
+        ],
+        "upvotes": 320,
+        "commentsCount": 70,
+        "ageHours": 8
+      },
+      "expected": {
+        "min": 75,
+        "max": 100,
+        "disclosure": "missing"
+      }
+    },
+    {
+      "id": "dm-bait",
+      "description": "Transformation story, comment 'interested', DM me, no product named",
+      "post": {
+        "title": "How I went from $0 to $12k/month in 6 months (no fluff)",
+        "body": "Six months ago I was broke and burned out. Then I discovered a system that changed everything. Now I make $12k/month working four hours a day. I can't share everything here, but comment 'interested' and I'll DM you the exact template. Limited spots this week.",
+        "subreddit": "Entrepreneur",
+        "upvotes": 60,
+        "commentsCount": 90,
+        "ageHours": 2
+      },
+      "expected": {
+        "min": 60,
+        "max": 100,
+        "disclosure": "missing"
+      }
+    },
+    {
+      "id": "honest-comparison",
+      "description": "Balanced comparison of three tools with pros and cons, no links",
+      "post": {
+        "title": "Notion vs Obsidian vs Logseq after six months with each",
+        "body": "Notion is polished and great for teams, but offline mode is a real drawback and it gets slow with big databases. Obsidian is fast and local-first; the learning curve is steep and plugins can break on updates. Logseq is free and open source but buggy at times and the mobile app lags. If you want collaboration: Notion. If you want ownership: Obsidian. Depends on your needs; there are pros and cons to each.",
+        "subreddit": "PKMS",
+        "upvotes": 500,
+        "commentsCount": 120,
+        "ageHours": 20
+      },
+      "expected": {
+        "min": 0,
+        "max": 25,
+        "disclosure": "unknown"
+      }
+    },
+    {
+      "id": "affiliate-review",
+      "description": "Glowing review with an Amazon affiliate tag, no disclosure",
+      "post": {
+        "title": "Finally found a standing desk that doesn't wobble",
+        "body": "After three returns I got the Elevate Pro and it is rock solid at full height, quiet motor, memory presets. Honestly a game changer for my back. Here is the one I got: https://www.amazon.com/dp/B0EXAMPLE?tag=deskguy-20",
+        "subreddit": "battlestations",
+        "links": [
+          "https://www.amazon.com/dp/B0EXAMPLE?tag=deskguy-20"
+        ],
+        "outboundDomains": [
+          "amazon.com"
+        ],
+        "upvotes": 75,
+        "commentsCount": 14,
+        "ageHours": 30
+      },
+      "expected": {
+        "min": 60,
+        "max": 100,
+        "disclosure": "missing"
+      }
+    },
+    {
+      "id": "affiliate-review-disclosed",
+      "description": "Same review with an explicit affiliate disclosure",
+      "post": {
+        "title": "Finally found a standing desk that doesn't wobble",
+        "body": "After three returns I got the Elevate Pro and it is rock solid at full height, quiet motor, memory presets. Honestly a game changer for my back. Here is the one I got: https://www.amazon.com/dp/B0EXAMPLE?tag=deskguy-20 (affiliate link, I earn a small commission).",
+        "subreddit": "battlestations",
+        "links": [
+          "https://www.amazon.com/dp/B0EXAMPLE?tag=deskguy-20"
+        ],
+        "outboundDomains": [
+          "amazon.com"
+        ],
+        "upvotes": 75,
+        "commentsCount": 14,
+        "ageHours": 30
+      },
+      "expected": {
+        "min": 60,
+        "max": 100,
+        "disclosure": "clear"
+      }
+    },
+    {
+      "id": "polished-organic",
+      "description": "Polished, structured, enthusiastic writing about a free habit; no product",
+      "post": {
+        "title": "The 2-minute rule changed how I start my mornings",
+        "body": "Here is the framework. 1) Pick the smallest version of the habit. 2) Anchor it to something you already do. 3) Track it visibly. 4) Never miss twice. It sounds trivial. It is not. Three months in, my mornings are calm, my inbox is handled by 9, and I have not skipped a workout. Try it for a week and report back.",
+        "subreddit": "getdisciplined",
+        "upvotes": 900,
+        "commentsCount": 130,
+        "ageHours": 15
+      },
+      "expected": {
+        "min": 0,
+        "max": 39,
+        "disclosure": "unknown"
+      }
+    },
+    {
+      "id": "unclear-working-on",
+      "description": "Vague 'something I have been working on' with a signup link",
+      "post": {
+        "title": "A little something I have been working on for note-taking",
+        "body": "Something I have been working on for a while: NoteBeam. It turns voice memos into structured notes. Sign up at https://notebeam.app to get early access, would love thoughts.",
+        "subreddit": "productivity",
+        "links": [
+          "https://notebeam.app"
+        ],
+        "outboundDomains": [
+          "notebeam.app"
+        ],
+        "upvotes": 20,
+        "commentsCount": 6,
+        "ageHours": 7
+      },
+      "expected": {
+        "min": 60,
+        "max": 100,
+        "disclosure": "unclear"
+      }
+    },
+    {
+      "id": "accused-but-organic",
+      "description": "Organic-looking recommendation; one unsupported 'this is an ad' comment; OP answers",
+      "post": {
+        "title": "This budgeting app finally helped me",
+        "body": "PennyPath is simple. There is a free version. It doesn't sync with every bank though which is annoying, and the reports are basic.",
+        "subreddit": "personalfinance",
+        "author": "saver_jane",
+        "isDetailPage": true,
+        "upvotes": 45,
+        "commentsCount": 12,
+        "ageHours": 10,
+        "visibleComments": [
+          {
+            "author": "grumpy_dan",
+            "text": "This is an ad."
+          },
+          {
+            "author": "saver_jane",
+            "isOp": true,
+            "text": "Not affiliated, just a user. Happy to share my setup."
+          }
+        ]
+      },
+      "expected": {
+        "min": 0,
+        "max": 45,
+        "disclosure": "unknown"
+      }
+    },
+    {
+      "id": "employee-disclosed-tips",
+      "description": "Employee disclosure up front, genuinely useful tips, no link",
+      "post": {
+        "title": "Tips for getting more out of spreadsheet pivot tables",
+        "body": "Disclosure: I work for a company that makes a spreadsheet tool, but these tips work in any of them. 1) Name your ranges. 2) Use a helper column for grouping. 3) Refresh before you trust totals. 4) Filters before pivots. Nothing to buy here.",
+        "subreddit": "excel",
+        "upvotes": 300,
+        "commentsCount": 40,
+        "ageHours": 18
+      },
+      "expected": {
+        "min": 10,
+        "max": 50,
+        "disclosure": "clear"
+      }
+    },
+    {
+      "id": "workflow-undisclosed-with-history",
+      "description": "Same workflow post; public history shows the same tool pushed across five communities and a founder statement elsewhere",
+      "post": {
+        "title": "My exact content workflow that took me from 0 to 50k views a month",
+        "body": "Step 1: research topics in Google Trends. Step 2: outline in Notion. Step 3: run the draft through Rankforge (https://rankforge.io/?ref=maya) which fixes search intent, adds internal links and rewrites the intro - this is the step that changed everything. Step 4: publish on WordPress. Step 5: schedule on Buffer. Rankforge is the part I would not skip.",
+        "subreddit": "content_marketing",
+        "links": [
+          "https://rankforge.io/?ref=maya"
+        ],
+        "outboundDomains": [
+          "rankforge.io"
+        ],
+        "upvotes": 320,
+        "commentsCount": 70,
+        "ageHours": 8,
+        "author": "maya_writes",
+        "authorHistory": {
+          "author": "maya_writes",
+          "fetchedAt": 1757000000000,
+          "available": true,
+          "accountAgeDays": 45,
+          "linkKarma": 30,
+          "commentKarma": 80,
+          "submissions": [
+            {
+              "subreddit": "SEO",
+              "title": "How Rankforge fixed my search intent problem",
+              "domain": "rankforge.io",
+              "url": "https://rankforge.io/?ref=maya",
+              "createdUtc": 1788358894
+            },
+            {
+              "subreddit": "blogging",
+              "title": "My exact content workflow that took me from 0 to 40k views",
+              "excerpt": "Step 3: run it through Rankforge which changed everything for my intent.",
+              "createdUtc": 1788099694
+            },
+            {
+              "subreddit": "Entrepreneur",
+              "title": "We built Rankforge to fix a problem every writer has",
+              "excerpt": "I am the founder of Rankforge and we built this after years of SEO work.",
+              "createdUtc": 1787754094
+            },
+            {
+              "subreddit": "juststarting",
+              "title": "Anyone else struggle with intent? Rankforge helped",
+              "domain": "rankforge.io",
+              "url": "https://rankforge.io",
+              "createdUtc": 1787494894
+            },
+            {
+              "subreddit": "marketing",
+              "title": "Rankforge vs manual optimisation - my results",
+              "domain": "rankforge.io",
+              "url": "https://rankforge.io/compare?ref=maya",
+              "createdUtc": 1787235694
+            }
+          ],
+          "comments": [
+            {
+              "subreddit": "SEO",
+              "excerpt": "Try Rankforge, it handles this: https://rankforge.io",
+              "linkDomains": [
+                "rankforge.io"
+              ],
+              "createdUtc": 1788445294
+            },
+            {
+              "subreddit": "blogging",
+              "excerpt": "Rankforge does exactly this.",
+              "linkDomains": [],
+              "createdUtc": 1788272494
+            },
+            {
+              "subreddit": "marketing",
+              "excerpt": "Nice post, thanks.",
+              "linkDomains": [],
+              "createdUtc": 1788186094
+            }
+          ]
+        }
+      },
+      "expected": {
+        "min": 85,
+        "max": 100,
+        "disclosure": "missing"
+      }
+    },
+    {
+      "id": "honest-comparison-with-history",
+      "description": "Same balanced comparison; long varied public history, product incidental",
+      "post": {
+        "title": "Notion vs Obsidian vs Logseq after six months with each",
+        "body": "Notion is polished and great for teams, but offline mode is a real drawback and it gets slow with big databases. Obsidian is fast and local-first; the learning curve is steep and plugins can break on updates. Logseq is free and open source but buggy at times and the mobile app lags. If you want collaboration: Notion. If you want ownership: Obsidian. Depends on your needs; there are pros and cons to each.",
+        "subreddit": "PKMS",
+        "upvotes": 500,
+        "commentsCount": 120,
+        "ageHours": 20,
+        "author": "notes_nerd",
+        "authorHistory": {
+          "author": "notes_nerd",
+          "fetchedAt": 1757000000000,
+          "available": true,
+          "accountAgeDays": 1900,
+          "linkKarma": 5000,
+          "commentKarma": 21000,
+          "submissions": [
+            {
+              "subreddit": "cooking",
+              "title": "Best way to store fresh herbs?",
+              "createdUtc": 1788358894
+            },
+            {
+              "subreddit": "hiking",
+              "title": "Trail report: Ben Nevis in October",
+              "domain": "walkhighlands.co.uk",
+              "url": "https://www.walkhighlands.co.uk/x",
+              "createdUtc": 1788013294
+            },
+            {
+              "subreddit": "PKMS",
+              "title": "How do you review weekly notes?",
+              "createdUtc": 1787667694
+            },
+            {
+              "subreddit": "personalfinance",
+              "title": "Finally paid off my car",
+              "createdUtc": 1786803694
+            },
+            {
+              "subreddit": "gardening",
+              "title": "Tomatoes finally ripening",
+              "domain": "rhs.org.uk",
+              "url": "https://www.rhs.org.uk/x",
+              "createdUtc": 1785939694
+            },
+            {
+              "subreddit": "books",
+              "title": "What I read this summer",
+              "domain": "goodreads.com",
+              "url": "https://www.goodreads.com/x",
+              "createdUtc": 1785075694
+            }
+          ],
+          "comments": [
+            {
+              "subreddit": "cooking",
+              "excerpt": "Wrap them in a damp towel.",
+              "linkDomains": [],
+              "createdUtc": 1788445294
+            },
+            {
+              "subreddit": "hiking",
+              "excerpt": "Take layers, it gets cold at the top.",
+              "linkDomains": [],
+              "createdUtc": 1788358894
+            },
+            {
+              "subreddit": "PKMS",
+              "excerpt": "Weekly review on Sundays works for me.",
+              "linkDomains": [],
+              "createdUtc": 1788272494
+            },
+            {
+              "subreddit": "gardening",
+              "excerpt": "Mine did the same last year.",
+              "linkDomains": [],
+              "createdUtc": 1788099694
+            }
+          ]
+        }
+      },
+      "expected": {
+        "min": 0,
+        "max": 19,
+        "disclosure": "unknown"
+      }
+    }
+  ]
+}

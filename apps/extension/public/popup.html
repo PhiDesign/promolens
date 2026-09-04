@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>PromoLens</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #ffffff;
+        --fg: #1a1a1b;
+        --muted: #6b6f75;
+        --border: #d9dcdf;
+        --accent: #4f46e5;
+        --ok: #2e9e5b;
+        --bad: #d1433b;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #1a1a1b;
+          --fg: #e6e7e8;
+          --muted: #a4a7ab;
+          --border: #343536;
+          --accent: #8b85ff;
+          --ok: #4cc27a;
+          --bad: #ef6b63;
+        }
+      }
+      body {
+        margin: 0;
+        width: 300px;
+        font: 13px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        color: var(--fg);
+        background: var(--bg);
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 14px 8px;
+        border-bottom: 1px solid var(--border);
+      }
+      header h1 { font-size: 15px; margin: 0; }
+      header small { color: var(--muted); margin-left: auto; }
+      section { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+      section:last-of-type { border-bottom: 0; }
+      label.row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 6px 0;
+        cursor: pointer;
+      }
+      label.row span { flex: 1; }
+      .hint { color: var(--muted); font-size: 12px; margin: 2px 0 0; }
+      /* Switches: the real checkbox stays for keyboard/screen readers; only the look changes. */
+      input[type="checkbox"][role="switch"] {
+        appearance: none;
+        -webkit-appearance: none;
+        flex: none;
+        width: 36px;
+        height: 20px;
+        margin: 0;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--border);
+        position: relative;
+        cursor: pointer;
+        transition: background-color 0.15s ease, border-color 0.15s ease;
+      }
+      input[type="checkbox"][role="switch"]::after {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--bg);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        transition: transform 0.15s ease;
+      }
+      input[type="checkbox"][role="switch"]:checked {
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+      input[type="checkbox"][role="switch"]:checked::after { transform: translateX(16px); background: #fff; }
+      input[type="checkbox"][role="switch"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+      @media (prefers-reduced-motion: reduce) {
+        input[type="checkbox"][role="switch"], input[type="checkbox"][role="switch"]::after { transition: none; }
+      }
+      input[type="url"] {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 6px 8px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: transparent;
+        color: var(--fg);
+        font: inherit;
+        margin-top: 6px;
+      }
+      button {
+        font: inherit;
+        padding: 6px 10px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--fg);
+        cursor: pointer;
+        margin-top: 8px;
+      }
+      button:hover { border-color: var(--accent); }
+      .status { font-size: 12px; margin-top: 6px; color: var(--muted); }
+      .status.ok { color: var(--ok); }
+      .status.bad { color: var(--bad); }
+      footer { padding: 8px 14px 12px; color: var(--muted); font-size: 11px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true">
+        <circle cx="11" cy="11" r="9" fill="none" stroke="#4f46e5" stroke-width="3" />
+        <circle cx="11" cy="11" r="3" fill="#4f46e5" />
+      </svg>
+      <h1>PromoLens</h1>
+      <small id="version"></small>
+    </header>
+
+    <section>
+      <label class="row">
+        <span>Show PromoLens on post pages</span>
+        <input type="checkbox" role="switch" id="enabled" />
+      </label>
+      <p class="hint">Adds one small button in the header of an opened post. Click it to analyse that post. Nothing is analysed until you click.</p>
+    </section>
+
+    <section>
+      <label class="row">
+        <span>Also show it on feed cards</span>
+        <input type="checkbox" role="switch" id="feedEnabled" />
+      </label>
+      <p class="hint">Clicking the button on a feed card fetches that post in the background (body, links, top comments) and scores it, so you can decide whether to open it. One post per click, never automatically.</p>
+    </section>
+
+    <section>
+      <label class="row">
+        <span>Check the author's public history</span>
+        <input type="checkbox" role="switch" id="historyEnabled" />
+      </label>
+      <p class="hint">When you click the button, PromoLens also reads the author's recent public posts and comments (the same pages you could open yourself) to see whether the same product recurs. Cached for 6 hours per author.</p>
+    </section>
+
+    <section>
+      <label class="row">
+        <span>Deeper analysis (language model)</span>
+        <input type="checkbox" role="switch" id="apiEnabled" />
+      </label>
+      <p class="hint">Optional. When you click the button, the post's visible text and comments are also sent to the API you run on your own machine, where a language model adds quoted evidence. Off by default.</p>
+      <input type="url" id="apiBaseUrl" placeholder="http://127.0.0.1:8787" spellcheck="false" />
+      <button id="checkApi" type="button">Check connection</button>
+      <div class="status" id="apiStatus" role="status" aria-live="polite"></div>
+    </section>
+
+    <section>
+      <button id="clearCache" type="button">Clear cached results</button>
+      <div class="status" id="cacheStatus" role="status" aria-live="polite"></div>
+    </section>
+
+    <footer>Estimates are based on observable signals and can be wrong. Not affiliated with Reddit.</footer>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
