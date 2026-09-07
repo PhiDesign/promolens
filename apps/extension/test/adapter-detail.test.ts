@@ -37,6 +37,32 @@ describe("adapter: post detail page", () => {
   });
 });
 
+describe("comment evidence on real-world wording", () => {
+  it("counts varied 'is this an ad' comments as independent concerns, spots 'spamming again' and an OP 'send a dm'", async () => {
+    const { analyzePost } = await import("@promolens/shared");
+    const r = analyzePost({
+      title: "Just hit 11.9k downloads - the 5 strategies that worked",
+      body: "1. Keywords. 2. Store page. 3. One-page site. 4. UGC at scale - I have now fully automated it with my own tool called DistributionMaxx. 5. Search ads.",
+      author: "john200ok",
+      links: ["https://distributionmaxx.com"],
+      isDetailPage: true,
+      visibleComments: [
+        { author: "a", text: "Hmm is this just to sell DistributionMaxx?" },
+        { author: "b", text: "Distribution Max spamming again. There is no app, it's all about distribution max lol" },
+        { author: "c", text: "Of course it's an ad." },
+        { author: "d", text: "TLDR: Use DistributionMaxx" },
+        { author: "e", text: "can anyone tell me what i need to improve on my page?" },
+        { author: "john200ok", text: "Sure. Send a dm or post it here", isOp: true, depth: 1 },
+      ],
+    });
+    const ids = r.signals.map((s) => s.id);
+    expect(ids).toContain("community.several-independent-concerns");
+    expect(ids).toContain("community.repeated-posts-identified");
+    expect(ids).toContain("behavior.dm-for-link");
+    expect(ids).not.toContain("community.coordinated-accusations");
+  });
+});
+
 describe("findDetailPostElement", () => {
   it("picks the post matching the URL id, not related posts", () => {
     document.body.innerHTML = `

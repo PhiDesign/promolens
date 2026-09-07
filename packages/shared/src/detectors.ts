@@ -174,7 +174,7 @@ const SIGNUP_BENEFIT_RE =
 const WAITLIST_RE = /\b(?:wait ?list|(?:join|sign ?up for|get|request|apply for) (?:the |our )?(?:early access|beta access|beta list|beta|closed beta)|early[- ]access (?:link|signup|sign-up|form))\b/i;
 const COMMENT_INTERESTED_RE =
   /\b(?:comment|reply|drop)\s+(?:with\s+)?["'“]?(?:interested|yes|me|info|link|send|template|workflow|access)\b/i;
-const DM_RE = /\b(?:dm|pm|message)\s+me\b|\bi(?:'ll| will) (?:dm|pm|message) you\b|\bdm (?:for|if you)\b|\bsend me a (?:dm|message|pm)\b|\bdms? (?:are )?open\b|\bshoot me a (?:dm|message)\b/i;
+const DM_RE = /\b(?:dm|pm|message)\s+me\b|\bi(?:'ll| will) (?:dm|pm|message) you\b|\bdm (?:for|if you)\b|\bsend (?:me )?a (?:dm|message|pm)\b|\bdms? (?:are )?open\b|\bshoot me a (?:dm|message)\b/i;
 const DM_FOR_RE = /\b(?:dm|pm|message)\s+me\b[^.!?\n]{0,40}\b(?:link|template|workflow|details|access|invite|code|guide|list|doc)\b/i;
 const FEEDBACK_RE = /\b(?:feedback|thoughts|what do you (?:think|guys think)|would love to hear|let me know what you think)\b/i;
 
@@ -645,7 +645,10 @@ function detectAccountSignals(ctx: DetectionContext): Signal[] {
 // 10-12. Comment evidence (post detail page only)
 // ---------------------------------------------------------------------------
 
-const ACCUSATION_RE = /\b(?:this is an ad|this is (?:just )?(?:an )?advert\w*|astroturf\w*|shill\w*|sponsored|undisclosed|self[- ]?promo\w*|promoting (?:his|her|their) own|op (?:is|works for|made|owns|built)|guerr?illa marketing|paid post|native ad|stealth marketing|obvious(?:ly)? (?:an )?ad\b|bot post|spam)\b/i;
+const ACCUSATION_RE =
+  /\b(?:this is (?:just )?(?:an )?ad\b|it'?s (?:just )?an ad\b|of course it'?s an ad|is this (?:just )?(?:an ad|to sell|an advert\w*|a promo\w*)|just to sell\b|this is (?:just )?(?:an )?advert\w*|advertisement|astroturf\w*|shill\w*|sponsored|undisclosed|self[- ]?promo\w*|promo(?:tional)? post|marketing post|seo post|promoting (?:his|her|their) own|op (?:is|works for|made|owns|built)|guerr?illa marketing|paid post|native ad|stealth marketing|obvious(?:ly)? (?:an )?ad\b|bot post|spam(?:ming|mer)?\b|slop ?bot|tl;?dr:? (?:buy|use|sign up for) )/i;
+/** A commenter says the author has posted this (or the product) before. */
+const REPEAT_MENTION_RE = /\b(?:spamming again|posting (?:this )?again|posted this (?:before|already|last week|yesterday)|again with (?:the|this)|keeps? posting|every (?:day|week) with|same post (?:as|again)|reposting)\b/i;
 const POSITIVE_RE = /\b(?:amazing|awesome|love (?:it|this)|great tool|thanks for sharing|just signed up|game changer|exactly what i needed|highly recommend)\b/i;
 const PRIVATE_GROUP_RE = /\b(?:join (?:my|our) (?:discord|telegram|whatsapp|newsletter|mailing list|community|slack)|subscribe to (?:my|our) newsletter)\b/i;
 const REDDIT_LINK_RE = /https?:\/\/(?:www\.|old\.)?reddit\.com\/(?:r\/\w+\/comments\/|user\/|u\/)/i;
@@ -695,6 +698,16 @@ export function detectCommentSignals(ctx: DetectionContext): CommentDetection {
         explanation: "One commenter suggests the post is an ad, without supporting evidence",
       }));
     }
+  }
+
+  // A commenter says the author has posted this product before.
+  const repeatMentions = others.filter((c) => REPEAT_MENTION_RE.test(c.text));
+  if (repeatMentions.length > 0 && !coordinatedAccusations) {
+    signals.push(makeSignal("community.repeated-posts-identified", {
+      verified: false,
+      explanation: `A commenter says the author has posted this before (${repeatMentions.length === 1 ? "one comment" : `${repeatMentions.length} comments`}, not verified by PromoLens)`,
+      excerpt: normalizeWhitespace(repeatMentions[0]!.text).slice(0, 80),
+    }));
   }
 
   // Evidence inside accusations: links to other Reddit posts / user pages.
