@@ -58,7 +58,9 @@ export const RING_CSS = `
     /* Reddit covers each post card with an invisible full-size link overlay.
        Positioning the host lifts the ring above it so hover/click reach us. */
     position: relative;
-    z-index: 5;
+    /* Just above the card's invisible link overlay (z-index auto), but below
+       Reddit's fixed header (z-index 4) so the ring scrolls under it. */
+    z-index: 1;
     pointer-events: auto;
     /* Reddit hides un-upgraded custom elements (:not(:defined)) with
        visibility: hidden. Our hosts are plain elements with hyphenated tag
