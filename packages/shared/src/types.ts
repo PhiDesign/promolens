@@ -103,6 +103,8 @@ export interface Signal {
   correlationGroup?: string;
   /** Short quoted evidence, when safe and useful (kept short on purpose). */
   excerpt?: string;
+  /** Link back to the Reddit content the evidence came from (attribution). */
+  sourceUrl?: string;
 }
 
 export interface VisibleComment {

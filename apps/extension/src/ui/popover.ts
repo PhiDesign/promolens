@@ -165,8 +165,25 @@ export class PopoverController {
     const meta = el(this.doc, "div", "meta");
     meta.append(metaLine(this.doc, disclosureLabel(result.disclosure)));
 
+    // Reasons, each linked back to its Reddit source when the evidence came
+    // from another post (attribution).
+    const sourceByExplanation = new Map(result.signals.filter((s) => s.sourceUrl).map((s) => [s.explanation, s.sourceUrl as string]));
     const list = this.doc.createElement("ul");
-    for (const r of result.reasons.slice(0, 3)) list.appendChild(el(this.doc, "li", "", r));
+    for (const r of result.reasons.slice(0, 3)) {
+      const li = el(this.doc, "li", "", r);
+      const url = sourceByExplanation.get(r);
+      if (url) {
+        const a = this.doc.createElement("a");
+        a.className = "src";
+        a.href = url;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.textContent = "source";
+        a.setAttribute("aria-label", "Open the Reddit post this evidence came from");
+        li.append(" ", a);
+      }
+      list.appendChild(li);
+    }
 
     const foot = el(this.doc, "p", "foot", sourceNote(result));
     card.append(score, meta, list, foot);

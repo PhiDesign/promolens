@@ -123,8 +123,9 @@ export function detectHistorySignals(post: PostInput, targets: HistoryTargets): 
     if (dup) {
       out.push(
         makeSignal("history.repeated-text", {
-          explanation: `A near-identical post was published in r/${dup.subreddit}${dup.createdUtc ? ` (${daysAgo(dup.createdUtc)})` : ""}`,
+          explanation: `u/${h.author} published a near-identical post in r/${dup.subreddit}${dup.createdUtc ? ` (${daysAgo(dup.createdUtc)})` : ""}`,
           excerpt: dup.title.slice(0, 80),
+          sourceUrl: permalinkUrl(dup.permalink),
         }),
       );
     }
@@ -139,13 +140,17 @@ export function detectHistorySignals(post: PostInput, targets: HistoryTargets): 
     }
 
     // The author says elsewhere that it is their product.
-    const admission = findSelfIdentification([...productSubs.map((s) => ({ text: `${s.title}\n${s.excerpt ?? ""}`, where: s.subreddit, when: s.createdUtc })), ...productComments.map((c) => ({ text: c.excerpt, where: c.subreddit, when: c.createdUtc }))]);
+    const admission = findSelfIdentification([
+      ...productSubs.map((s) => ({ text: `${s.title}\n${s.excerpt ?? ""}`, where: s.subreddit, when: s.createdUtc, url: permalinkUrl(s.permalink) })),
+      ...productComments.map((c) => ({ text: c.excerpt, where: c.subreddit, when: c.createdUtc, url: undefined })),
+    ]);
     if (admission) {
       out.push(
         makeSignal("account.self-identified-elsewhere", {
           verified: true,
-          explanation: `In r/${admission.where}${admission.when ? ` (${daysAgo(admission.when)})` : ""} the author describes the product as their own`,
+          explanation: `In r/${admission.where}${admission.when ? ` (${daysAgo(admission.when)})` : ""} u/${h.author} describes the product as their own`,
           excerpt: admission.excerpt,
+          sourceUrl: admission.url,
         }),
       );
     }
@@ -273,15 +278,24 @@ function findNearDuplicate(post: PostInput, candidates: HistorySubmission[]): Hi
   return undefined;
 }
 
-function findSelfIdentification(items: { text: string; where: string; when?: number }[]): { where: string; when?: number; excerpt: string } | undefined {
+function findSelfIdentification(
+  items: { text: string; where: string; when?: number; url?: string }[],
+): { where: string; when?: number; excerpt: string; url?: string } | undefined {
   for (const item of items) {
     const m = CLEAR_CREATOR_RE.exec(item.text) ?? CLEAR_EMPLOYMENT_RE.exec(item.text) ?? CLEAR_AFFILIATE_RE.exec(item.text);
     if (m) {
       const start = Math.max(0, m.index - 20);
-      return { where: item.where, when: item.when, excerpt: normalizeWhitespace(item.text.slice(start, start + 90)) };
+      return { where: item.where, when: item.when, excerpt: normalizeWhitespace(item.text.slice(start, start + 90)), url: item.url };
     }
   }
   return undefined;
+}
+
+/** Absolute Reddit URL for a permalink path, for attribution links. */
+function permalinkUrl(permalink: string | undefined): string | undefined {
+  if (!permalink) return undefined;
+  if (/^https?:\/\//i.test(permalink)) return permalink;
+  return `https://www.reddit.com${permalink.startsWith("/") ? "" : "/"}${permalink}`;
 }
 
 export type { HistoryComment };

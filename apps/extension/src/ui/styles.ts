@@ -194,6 +194,8 @@ export const POPOVER_CSS = `
   .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--pl-color, var(--pl-gray)); flex: none; }
   ul { margin: 0 0 8px; padding: 0 0 0 16px; }
   li { margin: 2px 0; }
+  a.src { color: var(--pl-focus); font-size: 11px; text-decoration: underline; white-space: nowrap; }
+  a.src:focus-visible { outline: 2px solid var(--pl-focus); outline-offset: 1px; }
   .foot { color: var(--pl-muted); font-size: 11px; margin: 0; font-style: italic; }
   .card[data-state="green"] { --pl-color: var(--pl-green); }
   .card[data-state="blue"] { --pl-color: var(--pl-blue); }

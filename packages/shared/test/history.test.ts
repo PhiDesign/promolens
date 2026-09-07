@@ -85,7 +85,20 @@ describe("detectHistorySignals", () => {
     expect(ids).not.toContain("availability.profile-history-unavailable");
     const self = detectHistorySignals({ ...post, authorHistory: spammy }, targets).find((s) => s.id === "account.self-identified-elsewhere");
     expect(self?.verified).toBe(true);
-    expect(self?.explanation).toMatch(/^In r\/Entrepreneur/);
+    expect(self?.explanation).toMatch(/^In r\/Entrepreneur .*u\/maya_writes describes the product as their own$/);
+  });
+
+  it("links history evidence back to its source post for attribution", () => {
+    const withLinks: AuthorHistory = {
+      ...spammy,
+      submissions: spammy.submissions.map((s, i) => ({ ...s, permalink: `/r/${s.subreddit}/comments/p${i}/x/` })),
+    };
+    const signals = detectHistorySignals({ ...post, authorHistory: withLinks }, targets);
+    const self = signals.find((s) => s.id === "account.self-identified-elsewhere");
+    expect(self?.sourceUrl).toBe("https://www.reddit.com/r/Entrepreneur/comments/p3/x/");
+    const dup = signals.find((s) => s.id === "history.repeated-text");
+    expect(dup?.sourceUrl).toMatch(/^https:\/\/www\.reddit\.com\/r\/blogging\/comments\//);
+    expect(dup?.explanation).toMatch(/^u\/maya_writes published a near-identical post/);
   });
 
   it("emits counter-signals for a varied, long-standing history", () => {

@@ -34,6 +34,7 @@ interface SignalOptions {
   verified?: boolean;
   explanation?: string;
   excerpt?: string;
+  sourceUrl?: string;
 }
 
 /** Build a Signal from a criterion id, with optional overrides. */
@@ -51,6 +52,7 @@ export function makeSignal(id: string, opts: SignalOptions = {}): Signal {
     strength: c.strength,
     correlationGroup: c.correlationGroup,
     excerpt: opts.excerpt,
+    sourceUrl: opts.sourceUrl,
   };
 }
 

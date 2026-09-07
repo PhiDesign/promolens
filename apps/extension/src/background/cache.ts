@@ -16,6 +16,28 @@ export interface CachedResult {
   storedAt: number;
 }
 
+/**
+ * Worker-memory store: lives only while the service worker runs and is never
+ * written to disk. Used for anything that contains post or comment text
+ * (author-history summaries), so Reddit content is not retained at rest.
+ */
+export function memoryStore(): KeyValueStore {
+  const data = new Map<string, unknown>();
+  return {
+    get: async (keys) => {
+      const out: Record<string, unknown> = {};
+      for (const [k, v] of data) if (keys === null || keys.includes(k)) out[k] = v;
+      return out;
+    },
+    set: async (items) => {
+      for (const [k, v] of Object.entries(items)) data.set(k, v);
+    },
+    remove: async (keys) => {
+      for (const k of keys) data.delete(k);
+    },
+  };
+}
+
 export const CACHE_PREFIX = "promolens:cache:";
 const DEFAULT_MAX_ENTRIES = 2000;
 

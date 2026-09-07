@@ -11,7 +11,7 @@
 import { loadSettings } from "../shared/settings.js";
 import type { CacheClearResponse, CacheGetResponse, EnrichResponse, HistoryResponse, Message, PostGetResponse, SimpleResponse } from "../shared/messages.js";
 import { ApiClient, ApiError } from "./apiClient.js";
-import { chromeLocalStore, ResultCache } from "./cache.js";
+import { chromeLocalStore, memoryStore, ResultCache } from "./cache.js";
 import { fetchAuthorHistory, HistoryCache } from "./history.js";
 import { fetchPostPage, normalizePermalink } from "./postFetch.js";
 
@@ -20,7 +20,8 @@ const postPageCache = new Map<string, { at: number; response: PostGetResponse }>
 const POST_PAGE_TTL_MS = 10 * 60 * 1000;
 
 const cache = new ResultCache(chromeLocalStore());
-const historyCache = new HistoryCache(chromeLocalStore());
+// History summaries contain excerpts of other people's posts: memory only, never on disk.
+const historyCache = new HistoryCache(memoryStore());
 /** In-flight history fetches, so two quick clicks on the same author share one request. */
 const historyInFlight = new Map<string, Promise<HistoryResponse>>();
 // A large language model can take 10-40 s per post (big prompt: criteria,

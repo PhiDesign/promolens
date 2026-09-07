@@ -34,6 +34,7 @@ export const SignalSchema = z.object({
   strength: SignalStrengthSchema,
   correlationGroup: z.string().max(60).optional(),
   excerpt: z.string().max(200).optional(),
+  sourceUrl: z.string().max(2000).optional(),
 });
 
 export const VisibleCommentSchema = z.object({

@@ -25,8 +25,8 @@ Not yet reviewed: the Developer Data Protection Addendum (Dev 7.1), the Public C
 
 1. Register a Reddit app; move `background/history.ts` and `background/postFetch.ts` to the OAuth Data API (user login, `oauth.reddit.com`, proper User-Agent). Keep the one-click-one-post behaviour.
 2. Decide the deeper-analysis story for the public build: rules-only by default; model analysis only as "run your own API" with a local model, or with written permission from Reddit for inference-only use.
-3. Do not persist post/comment/history excerpts at rest; keep them in worker memory for the session only, or encrypt.
-4. Add permalink links and usernames to evidence lines that quote other posts or comments.
+3. ~~Do not persist post/comment/history excerpts at rest~~ - done 2026-09-07: history summaries and fetched post pages live in worker memory only; only hashed results are stored.
+4. ~~Add permalink links and usernames to evidence lines that quote other posts or comments~~ - done 2026-09-07: history evidence names `u/<author>` and carries a "source" link to the post.
 5. Publish the privacy policy at a stable URL; add the deletion instructions; read and comply with the Developer DPA.
 6. Read the Public Content Policy and Brand Guidelines; keep "not affiliated with Reddit" wording; "PromoLens for Reddit" is the permitted naming pattern if the Reddit wordmark is ever used.
 7. Keep the project non-commercial unless a separate agreement with Reddit exists.
@@ -37,6 +37,18 @@ Not yet reviewed: the Developer Data Protection Addendum (Dev 7.1), the Public C
 - **Commercial / API questions contact form:** `https://reddithelp.com/hc/en-us/requests/new?ticket_form_id=14868593862164` (the "contact us" link in the Developer Terms).
 - **Non-commercial Data API sign-up:** the "sign-up here" link under "Getting Started" in that article (registers an app; needed for OAuth).
 - Eligibility for commercial use "will be determined by the information you provide about your use case and App during Reddit's App Review" - so register the app first, describe it honestly, then ask.
+
+## Responsible Builder Policy (read 2026-09-07)
+
+Shown by Reddit before app creation. Points that matter for PromoLens:
+
+- **"Approval is required: You must request access and get explicit approval before accessing any Reddit data through our API."** Creating an app is no longer enough; Data API access is granted on request. Non-commercial developers are pointed at Devvit first; "if your use case is not supported by Devvit, file a ticket" - a browser extension is such a case.
+- **Transparency:** do not misrepresent why you access data; one account, one request per use case.
+- **Zero tolerance for privacy violations:** never process data "to derive or infer potentially sensitive characteristics about Reddit users (e.g., health, political affiliation, sexual orientation)" or re-identify users. PromoLens infers properties of a *post* (promotional, disclosed) and observable posting behaviour (the same product recurring), never personal characteristics; keep it that way and say so in the request and the privacy policy.
+- **No unapproved commercialization or AI training** - restated; consistent with the review above.
+- **Apps must register and create a developer profile** for an app label; app accounts must be single-purpose (not relevant while PromoLens acts as the logged-in user rather than as its own account).
+
+Consequence: the OAuth migration depends on an approved access request, not just on a client ID. Submit the non-commercial request first; keep the paid-tier question for a separate, later ticket, but do not hide the intent.
 
 ## Why the design already helps
 
