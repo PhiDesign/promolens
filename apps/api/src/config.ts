@@ -18,7 +18,19 @@ export interface ApiConfig {
   llmBaseUrl: string | undefined;
   /** Timeout for one model call; must stay below requestTimeoutMs. */
   llmTimeoutMs: number;
+  /** Reasoning models: how long to think. Defaults to "low" for GPT-5 / o-series ids. */
+  llmReasoningEffort: "minimal" | "low" | "medium" | "high" | undefined;
+  /** GPT-5 family answer length. Defaults to "low" for GPT-5 ids. */
+  llmVerbosity: "low" | "medium" | "high" | undefined;
   logRawContent: boolean;
+}
+
+const REASONING_MODEL = /^(gpt-5|o[1-9])/i;
+
+function pick<T extends string>(value: string | undefined, allowed: readonly T[], fallback: T | undefined): T | undefined {
+  const v = value?.trim().toLowerCase();
+  if (v === "none" || v === "off") return undefined;
+  return (allowed as readonly string[]).includes(v ?? "") ? (v as T) : fallback;
 }
 
 function num(value: string | undefined, fallback: number): number {
@@ -43,6 +55,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
     llmModel: env.LLM_MODEL?.trim() || undefined,
     llmBaseUrl: env.LLM_BASE_URL?.trim() || undefined,
     llmTimeoutMs: num(env.LLM_TIMEOUT_MS, 45_000),
+    llmReasoningEffort: pick(env.LLM_REASONING_EFFORT, ["minimal", "low", "medium", "high"] as const, REASONING_MODEL.test(env.LLM_MODEL?.trim() ?? "") ? "low" : undefined),
+    llmVerbosity: pick(env.LLM_VERBOSITY, ["low", "medium", "high"] as const, /^gpt-5/i.test(env.LLM_MODEL?.trim() ?? "") ? "low" : undefined),
     logRawContent: (env.LOG_RAW_CONTENT ?? "false").toLowerCase() === "true",
   };
 }

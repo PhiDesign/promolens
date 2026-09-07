@@ -29,6 +29,8 @@ export function createProvider(config: ApiConfig, log?: (line: string) => void):
         model: config.llmModel ?? "",
         baseUrl: config.llmBaseUrl,
         timeoutMs: Math.min(config.llmTimeoutMs, Math.max(1_000, config.requestTimeoutMs - 500)),
+        reasoningEffort: config.llmReasoningEffort,
+        verbosity: config.llmVerbosity,
       });
       if (config.provider === "openai-direct") {
         log?.("WARNING: ANALYSIS_PROVIDER=openai-direct is experimental - the model scores without the rule engine's caps");

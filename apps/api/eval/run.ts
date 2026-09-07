@@ -86,6 +86,8 @@ function buildProviders(names: string[], usage: { prompt: number; completion: nu
       model: config.llmModel,
       baseUrl: config.llmBaseUrl,
       timeoutMs: Math.max(config.llmTimeoutMs, 20_000),
+      reasoningEffort: config.llmReasoningEffort,
+      verbosity: config.llmVerbosity,
       onUsage: (u) => {
         usage.prompt += u.promptTokens;
         usage.completion += u.completionTokens;

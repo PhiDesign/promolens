@@ -18,6 +18,15 @@ export interface OpenAiClientOptions {
   fetchFn?: typeof fetch;
   /** Called with token usage after each call (for cost tracking). */
   onUsage?: (usage: { promptTokens: number; completionTokens: number }) => void;
+  /**
+   * For reasoning models (GPT-5 family, o-series): how long to "think" before
+   * answering. PromoLens asks for evidence extraction, not puzzle solving, so
+   * "low" is plenty and is many times faster than the default. Models that do
+   * not accept the parameter get a retry without it.
+   */
+  reasoningEffort?: "minimal" | "low" | "medium" | "high";
+  /** GPT-5 family: keep answers short. Same fallback rule. */
+  verbosity?: "low" | "medium" | "high";
 }
 
 export class OpenAiChatClient implements ChatClient {
@@ -34,14 +43,25 @@ export class OpenAiChatClient implements ChatClient {
     this.name = `openai:${options.model}`;
   }
 
+  /** Remembered after a 400 so we do not pay a failed round-trip on every call. */
+  private tuningRejected = false;
+
+  private tuningParams(): Record<string, string> {
+    if (this.tuningRejected) return {};
+    const extra: Record<string, string> = {};
+    if (this.options.reasoningEffort) extra.reasoning_effort = this.options.reasoningEffort;
+    if (this.options.verbosity) extra.verbosity = this.options.verbosity;
+    return extra;
+  }
+
   async complete(system: string, user: string, signal: AbortSignal): Promise<string> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.options.timeoutMs ?? 6_000);
     const onOuterAbort = () => controller.abort();
     signal.addEventListener("abort", onOuterAbort, { once: true });
 
-    try {
-      const res = await this.fetchFn(this.endpoint, {
+    const send = (extra: Record<string, string>) =>
+      this.fetchFn(this.endpoint, {
         method: "POST",
         headers: {
           "content-type": "application/json",
@@ -54,9 +74,27 @@ export class OpenAiChatClient implements ChatClient {
             { role: "user", content: user },
           ],
           response_format: { type: "json_object" },
+          ...extra,
         }),
         signal: controller.signal,
       });
+
+    try {
+      const extra = this.tuningParams();
+      let res = await send(extra);
+
+      if (res.status === 400 && Object.keys(extra).length > 0) {
+        // Older or third-party models reject reasoning_effort / verbosity:
+        // retry once without them and remember.
+        const err = (await res.clone().json().catch(() => undefined)) as { error?: { param?: unknown; message?: unknown; code?: unknown } } | undefined;
+        const mentionsTuning = /reasoning_effort|verbosity|unsupported_parameter|unknown_parameter/i.test(
+          `${String(err?.error?.param ?? "")} ${String(err?.error?.code ?? "")} ${String(err?.error?.message ?? "")}`,
+        );
+        if (mentionsTuning) {
+          this.tuningRejected = true;
+          res = await send({});
+        }
+      }
 
       if (!res.ok) {
         // Surface only the provider's short error code (e.g. insufficient_quota,

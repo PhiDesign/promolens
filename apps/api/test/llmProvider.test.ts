@@ -223,6 +223,25 @@ describe("OpenAiChatClient", () => {
     expect(client.name).toBe("openai:test-model");
   });
 
+  it("sends reasoning_effort/verbosity when configured and drops them after a 400 that rejects them", async () => {
+    const bodies: Record<string, unknown>[] = [];
+    const fetchFn: typeof fetch = async (_url, init) => {
+      const body = JSON.parse(String(init?.body)) as Record<string, unknown>;
+      bodies.push(body);
+      if ("reasoning_effort" in body) {
+        return new Response(JSON.stringify({ error: { message: "Unsupported parameter: 'reasoning_effort'", param: "reasoning_effort", code: "unsupported_parameter" } }), { status: 400 });
+      }
+      return new Response(JSON.stringify({ choices: [{ message: { content: '{"signals":[]}' } }] }), { status: 200 });
+    };
+    const client = new OpenAiChatClient({ apiKey: "sk-test", model: "gpt-5-mini", fetchFn, reasoningEffort: "low", verbosity: "low" });
+    expect(await client.complete("s", "u", ctrl())).toBe('{"signals":[]}');
+    expect(bodies[0]).toMatchObject({ reasoning_effort: "low", verbosity: "low" });
+    expect(bodies[1]).not.toHaveProperty("reasoning_effort");
+    await client.complete("s", "u", ctrl());
+    expect(bodies).toHaveLength(3); // the rejection is remembered: no second failed attempt
+    expect(bodies[2]).not.toHaveProperty("reasoning_effort");
+  });
+
   it("surfaces the provider's short error code but never the body", async () => {
     const fetchFn: typeof fetch = async () =>
       new Response(JSON.stringify({ error: { message: "You exceeded your quota; prompt was: secret", code: "insufficient_quota" } }), { status: 429 });
