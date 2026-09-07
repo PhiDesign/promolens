@@ -163,6 +163,10 @@ async function handle(message: Message): Promise<unknown> {
         const response: EnrichResponse = { ok: false, reason: "api_disabled" };
         return response;
       }
+      // A model call can take 10-40 s. Chrome may stop an idle service worker
+      // after ~30 s; touching an extension API resets that timer, so ping
+      // while the request is in flight (standard MV3 keep-alive).
+      const keepAlive = setInterval(() => void chrome.runtime.getPlatformInfo(() => undefined), 20_000);
       try {
         const result = await api.analyze(settings.apiBaseUrl, message.post, message.localSignals, message.hash);
         await cache.put(message.hash, result, await ttlMs());
@@ -171,6 +175,8 @@ async function handle(message: Message): Promise<unknown> {
       } catch (err) {
         const response: EnrichResponse = { ok: false, reason: err instanceof ApiError ? err.reason : "unknown" };
         return response;
+      } finally {
+        clearInterval(keepAlive);
       }
     }
     case "API_HEALTH": {

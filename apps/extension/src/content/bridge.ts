@@ -6,7 +6,7 @@
  * answer in time, so the content script always falls back to local results.
  */
 import type { Message } from "../shared/messages.js";
-import { warn } from "./debug.js";
+import { debug, warn } from "./debug.js";
 
 const DEFAULT_TIMEOUT_MS = 1_500;
 const TIMEOUTS: Partial<Record<Message["type"], number>> = {
@@ -33,7 +33,14 @@ export async function send<T>(message: Message): Promise<T | undefined> {
       clearTimeout(timer); // a reply arrived: no phantom warning later
     }
   } catch (err) {
-    warn(`message ${message.type} failed`, err instanceof Error ? err.message : err);
+    const text = err instanceof Error ? err.message : String(err);
+    // Expected when the extension is reloaded or the worker restarts while a
+    // request is in flight: the caller falls back to the local result.
+    if (/message channel closed|Extension context invalidated|Receiving end does not exist/i.test(text)) {
+      debug(`message ${message.type}: background worker went away (${text})`);
+    } else {
+      warn(`message ${message.type} failed`, text);
+    }
     return undefined;
   }
 }
