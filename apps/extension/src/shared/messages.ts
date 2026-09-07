@@ -13,10 +13,22 @@ export type Message =
   /** Public posting history of one author, fetched on the user's click. */
   | { type: "HISTORY_GET"; author: string }
   /** Full content of one post (body, links, top comments), fetched on the user's click on a feed card. */
-  | { type: "POST_GET"; permalink: string };
+  | { type: "POST_GET"; permalink: string }
+  /** Reddit Data API login (official OAuth app). */
+  | { type: "REDDIT_LOGIN" }
+  | { type: "REDDIT_LOGOUT" }
+  | { type: "REDDIT_STATUS" };
 
 export type HistoryResponse = { ok: true; history: AuthorHistory } | { ok: false; reason: string };
 export type PostGetResponse = { ok: true; post: PostInput } | { ok: false; reason: string };
+export interface RedditStatusResponse {
+  ok: boolean;
+  /** REDDIT_CLIENT_ID is set: the login option exists at all. */
+  configured: boolean;
+  loggedIn: boolean;
+  username?: string;
+  message?: string;
+}
 
 export interface CacheGetResponse {
   ok: true;

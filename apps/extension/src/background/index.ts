@@ -9,11 +9,51 @@
  * It never sees provider secrets and never logs post content.
  */
 import { loadSettings } from "../shared/settings.js";
-import type { CacheClearResponse, CacheGetResponse, EnrichResponse, HistoryResponse, Message, PostGetResponse, SimpleResponse } from "../shared/messages.js";
+import type {
+  CacheClearResponse,
+  CacheGetResponse,
+  EnrichResponse,
+  HistoryResponse,
+  Message,
+  PostGetResponse,
+  RedditStatusResponse,
+  SimpleResponse,
+} from "../shared/messages.js";
+import { REDDIT_CLIENT_ID } from "../shared/redditApp.js";
 import { ApiClient, ApiError } from "./apiClient.js";
 import { chromeLocalStore, memoryStore, ResultCache } from "./cache.js";
-import { fetchAuthorHistory, HistoryCache } from "./history.js";
+import { fetchAuthorHistory, HistoryCache, type FetchLike } from "./history.js";
 import { fetchPostPage, normalizePermalink } from "./postFetch.js";
+import { dataApiFetch, RedditAuth } from "./redditAuth.js";
+
+const rawFetch: FetchLike = (url, init) => fetch(url, init);
+
+/** Official Data API login. Dormant until REDDIT_CLIENT_ID is set (see shared/redditApp.ts). */
+const redditAuth = new RedditAuth(chromeLocalStore(), {
+  clientId: REDDIT_CLIENT_ID,
+  redirectUrl: typeof chrome !== "undefined" && chrome.identity ? chrome.identity.getRedirectURL("oauth") : "",
+  launch: (authUrl) =>
+    new Promise<string>((resolve, reject) => {
+      chrome.identity.launchWebAuthFlow({ url: authUrl, interactive: true }, (redirect) => {
+        if (chrome.runtime.lastError || !redirect) reject(new Error(chrome.runtime.lastError?.message ?? "Login window was closed"));
+        else resolve(redirect);
+      });
+    }),
+  fetchFn: rawFetch,
+});
+
+/**
+ * Which way to read Reddit: the official Data API when the user is logged in
+ * and has not switched it off, otherwise the page session (public pages the
+ * user could open themselves).
+ */
+async function redditFetch(): Promise<{ fetchFn: FetchLike; via: "data-api" | "session" }> {
+  const settings = await loadSettings();
+  if (settings.dataApiEnabled && redditAuth.configured && (await redditAuth.status()).loggedIn) {
+    return { fetchFn: dataApiFetch(redditAuth, rawFetch), via: "data-api" };
+  }
+  return { fetchFn: rawFetch, via: "session" };
+}
 
 /** Fetched post pages, kept briefly in worker memory so a second click does not refetch. */
 const postPageCache = new Map<string, { at: number; response: PostGetResponse }>();
@@ -61,8 +101,31 @@ async function handle(message: Message): Promise<unknown> {
       const key = normalizePermalink(message.permalink) ?? message.permalink;
       const hit = postPageCache.get(key);
       if (hit && hit.at + POST_PAGE_TTL_MS > Date.now()) return hit.response;
-      const response = await fetchPostPage(message.permalink, (url, init) => fetch(url, init));
+      const { fetchFn } = await redditFetch();
+      const response = await fetchPostPage(message.permalink, fetchFn);
       if (response.ok) postPageCache.set(key, { at: Date.now(), response });
+      return response;
+    }
+    case "REDDIT_STATUS": {
+      const s = await redditAuth.status();
+      const response: RedditStatusResponse = { ok: true, configured: s.configured, loggedIn: s.loggedIn, username: s.username };
+      return response;
+    }
+    case "REDDIT_LOGIN": {
+      try {
+        const s = await redditAuth.login();
+        const response: RedditStatusResponse = { ok: true, configured: true, loggedIn: true, username: s.username, message: `Logged in as u/${s.username ?? "?"}` };
+        return response;
+      } catch (err) {
+        const response: RedditStatusResponse = { ok: false, configured: redditAuth.configured, loggedIn: false, message: err instanceof Error ? err.message : "Login failed" };
+        return response;
+      }
+    }
+    case "REDDIT_LOGOUT": {
+      await redditAuth.logout();
+      historyCache.clear().catch(() => undefined);
+      postPageCache.clear();
+      const response: RedditStatusResponse = { ok: true, configured: redditAuth.configured, loggedIn: false, message: "Logged out" };
       return response;
     }
     case "HISTORY_GET": {
@@ -80,7 +143,8 @@ async function handle(message: Message): Promise<unknown> {
       const key = author.toLowerCase();
       let pending = historyInFlight.get(key);
       if (!pending) {
-        pending = fetchAuthorHistory(author, (url, init) => fetch(url, init))
+        pending = redditFetch()
+          .then(({ fetchFn }) => fetchAuthorHistory(author, fetchFn))
           .then(async (history): Promise<HistoryResponse> => {
             // Cache successes for hours; cache "unavailable" briefly so a private
             // profile is not re-fetched on every click, but retried later.

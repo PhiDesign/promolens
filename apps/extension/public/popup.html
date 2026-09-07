@@ -140,6 +140,17 @@
       <p class="hint">Clicking the button on a feed card fetches that post in the background (body, links, top comments) and scores it, so you can decide whether to open it. One post per click, never automatically.</p>
     </section>
 
+    <section id="redditSection" hidden>
+      <label class="row">
+        <span>Use the official Reddit API</span>
+        <input type="checkbox" role="switch" id="dataApiEnabled" />
+      </label>
+      <p class="hint">Log in with your Reddit account so posts and profiles are read through Reddit's Data API (read-only) instead of the page session. Nothing is posted or changed on your account.</p>
+      <button id="redditLogin" type="button">Log in with Reddit</button>
+      <button id="redditLogout" type="button" hidden>Log out</button>
+      <div class="status" id="redditStatus" role="status" aria-live="polite"></div>
+    </section>
+
     <section>
       <label class="row">
         <span>Check the author's public history</span>

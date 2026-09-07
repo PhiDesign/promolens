@@ -4,8 +4,8 @@
   "version": "0.2.0",
   "description": "Estimates how likely Reddit posts are to be promotional, showing observable evidence and uncertainty. Not affiliated with Reddit.",
   "minimum_chrome_version": "116",
-  "permissions": ["storage"],
-  "host_permissions": ["https://www.reddit.com/*"],
+  "permissions": ["storage", "identity"],
+  "host_permissions": ["https://www.reddit.com/*", "https://oauth.reddit.com/*"],
   "background": {
     "service_worker": "background.js"
   },

@@ -23,7 +23,7 @@ Not yet reviewed: the Developer Data Protection Addendum (Dev 7.1), the Public C
 
 ## Actions before a public release
 
-1. Register a Reddit app; move `background/history.ts` and `background/postFetch.ts` to the OAuth Data API (user login, `oauth.reddit.com`, proper User-Agent). Keep the one-click-one-post behaviour.
+1. Register a Reddit app; move `background/history.ts` and `background/postFetch.ts` to the OAuth Data API (user login, `oauth.reddit.com`). Keep the one-click-one-post behaviour. **Built 2026-09-07, dormant:** `background/redditAuth.ts` implements the installed-app OAuth flow (code grant, permanent refresh token, silent refresh, revoke on logout) and `dataApiFetch` routes the existing fetchers through `oauth.reddit.com`; the popup shows "Log in with Reddit" once `REDDIT_CLIENT_ID` in `apps/extension/src/shared/redditApp.ts` is filled in after Reddit's approval. Known limitation: a browser extension cannot set a custom `User-Agent` on fetch; document this in the access request if Reddit asks.
 2. Decide the deeper-analysis story for the public build: rules-only by default; model analysis only as "run your own API" with a local model, or with written permission from Reddit for inference-only use.
 3. ~~Do not persist post/comment/history excerpts at rest~~ - done 2026-09-07: history summaries and fetched post pages live in worker memory only; only hashed results are stored.
 4. ~~Add permalink links and usernames to evidence lines that quote other posts or comments~~ - done 2026-09-07: history evidence names `u/<author>` and carries a "source" link to the post.

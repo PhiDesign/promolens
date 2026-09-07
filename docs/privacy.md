@@ -60,7 +60,7 @@ When you click "analyse" on a post and **Check the author's public history** is 
 
 It does not read private messages, saved items, hidden or removed content, or anything not publicly visible. It never fetches a profile for a post you did not click, and never fetches profiles of commenters. Switch the toggle off in the popup to stop it; the engine then reports "author history not checked" and keeps confidence lower.
 
-Note for any public release: this reads Reddit's public JSON listings rather than the official API. Before distributing PromoLens beyond local use, this should move to a registered Reddit API application with OAuth, and this section should be reviewed against Reddit's Data API terms.
+**Official API option.** When the extension is built with a registered Reddit app id, the popup offers **Log in with Reddit**. Logging in (read-only scopes: `identity`, `read`, `history`) makes these reads go through Reddit's Data API with your own account's token instead of the page session; PromoLens never posts, votes, or changes anything on your account. Tokens are stored in the extension's storage on your device and are revoked at Reddit and deleted when you log out. Until Reddit has approved PromoLens's Data API access, the login option is hidden and the extension reads public pages with your browser session, as described above; see `docs/reddit-compliance.md`.
 
 ## Feed-card clicks (on by default, one click, one post)
 

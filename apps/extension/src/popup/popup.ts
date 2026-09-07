@@ -3,7 +3,7 @@
  * No inline scripts - this file is loaded from popup.html via <script src>.
  */
 import { loadSettings, saveSettings } from "../shared/settings.js";
-import type { CacheClearResponse, Message, SimpleResponse } from "../shared/messages.js";
+import type { CacheClearResponse, Message, RedditStatusResponse, SimpleResponse } from "../shared/messages.js";
 
 function $<T extends HTMLElement>(id: string): T {
   const el = document.getElementById(id);
@@ -56,6 +56,33 @@ async function init(): Promise<void> {
     apiStatus.className = `status ${res?.ok ? "ok" : "bad"}`;
     apiStatus.textContent = res?.message ?? "Could not reach the background worker";
   });
+
+  // Official Reddit API login: only shown when the app is configured.
+  const redditSection = $<HTMLElement>("redditSection");
+  const dataApiEnabled = $<HTMLInputElement>("dataApiEnabled");
+  const redditLogin = $<HTMLButtonElement>("redditLogin");
+  const redditLogout = $<HTMLButtonElement>("redditLogout");
+  const redditStatus = $<HTMLDivElement>("redditStatus");
+  dataApiEnabled.checked = settings.dataApiEnabled;
+  dataApiEnabled.addEventListener("change", () => void saveSettings({ dataApiEnabled: dataApiEnabled.checked }));
+  const renderReddit = (s: RedditStatusResponse | undefined) => {
+    if (!s?.configured) {
+      redditSection.hidden = true;
+      return;
+    }
+    redditSection.hidden = false;
+    redditLogin.hidden = s.loggedIn;
+    redditLogout.hidden = !s.loggedIn;
+    redditStatus.className = `status ${s.ok ? (s.loggedIn ? "ok" : "") : "bad"}`;
+    redditStatus.textContent = s.message ?? (s.loggedIn ? `Logged in as u/${s.username ?? "?"}` : "Not logged in - reading public pages with your browser session.");
+  };
+  renderReddit(await send<RedditStatusResponse>({ type: "REDDIT_STATUS" }));
+  redditLogin.addEventListener("click", async () => {
+    redditStatus.className = "status";
+    redditStatus.textContent = "Opening Reddit…";
+    renderReddit(await send<RedditStatusResponse>({ type: "REDDIT_LOGIN" }));
+  });
+  redditLogout.addEventListener("click", async () => renderReddit(await send<RedditStatusResponse>({ type: "REDDIT_LOGOUT" })));
 
   clearCache.addEventListener("click", async () => {
     const res = await send<CacheClearResponse>({ type: "CACHE_CLEAR" });

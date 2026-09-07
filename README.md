@@ -158,7 +158,7 @@ To compare rules-only, rules + model witness, and model-only scoring on labelled
 
 - **Estimates, not verdicts.** The rules are hypotheses to be tuned against labelled posts. Expect false positives (genuinely enthusiastic recommendations) and false negatives (subtle promotion).
 - **Public information only.** Author history comes from the author's public profile listing (last ~40 posts and comments); private, suspended or deleted profiles yield "history unavailable" and lower confidence. Profile bios and cross-community coordination are still not evaluated.
-- **Unofficial Reddit listings.** The history check reads Reddit's public JSON pages with your own session. Fine for personal use; a public release should switch to a registered Reddit API app (see `docs/privacy.md`).
+- **Reddit access.** By default the history and feed-card checks read Reddit's public JSON pages with your own session. An official Data API path (OAuth "Log in with Reddit", read-only) is built in and switches on once a registered app id is set in `apps/extension/src/shared/redditApp.ts` after Reddit's approval - see `docs/reddit-compliance.md`.
 - **On demand only.** Nothing is scored in feeds; you decide which posts to analyse.
 - **Reach is approximate.** It uses raw votes/comments/age, not a comparison with similar posts in the same subreddit.
 - **English-first heuristics.** Detectors are regular expressions written for English text.

@@ -13,6 +13,8 @@ export interface Settings {
   historyEnabled: boolean;
   /** Also show the button on feed cards; a click fetches the post in the background and scores it. */
   feedEnabled: boolean;
+  /** When logged in with Reddit, read posts and profiles through the official Data API instead of the page session. */
+  dataApiEnabled: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -22,6 +24,7 @@ export const DEFAULT_SETTINGS: Settings = {
   cacheTtlHours: 24,
   historyEnabled: true,
   feedEnabled: true,
+  dataApiEnabled: true,
 };
 
 export const SETTINGS_KEY = "promolens:settings";
@@ -37,6 +40,7 @@ function sanitize(raw: unknown): Settings {
     cacheTtlHours: ttl,
     historyEnabled: typeof r.historyEnabled === "boolean" ? r.historyEnabled : DEFAULT_SETTINGS.historyEnabled,
     feedEnabled: typeof r.feedEnabled === "boolean" ? r.feedEnabled : DEFAULT_SETTINGS.feedEnabled,
+    dataApiEnabled: typeof r.dataApiEnabled === "boolean" ? r.dataApiEnabled : DEFAULT_SETTINGS.dataApiEnabled,
   };
 }
 
