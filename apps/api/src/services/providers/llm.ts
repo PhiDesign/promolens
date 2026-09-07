@@ -78,6 +78,9 @@ export const RETRACTABLE_CATEGORIES: ReadonlySet<SignalCategory> = new Set<Signa
 /** Even inside retractable categories, link-derived signals are facts. */
 const NEVER_RETRACT = new Set(["cta.repeated-links", "workflow.only-product-linked"]);
 
+/** Claims in these categories describe the author's other activity and may quote the fetched history. */
+const HISTORY_QUOTE_CATEGORIES: ReadonlySet<SignalCategory> = new Set<SignalCategory>(["account", "repetition"]);
+
 const ModelOutputSchema = z.object({
   signals: z
     .array(
@@ -146,8 +149,15 @@ export class LlmWitnessProvider implements AnalysisProvider {
 
   /** Apply verified model claims, observations and permitted retractions to the rule signals. */
   merge(title: string, body: string, ruleSignals: Signal[], output: ModelOutput, historyText = ""): Signal[] {
-    // The model may quote the post, or the author's public history when it was fetched.
-    const haystack = normalizeForMatch(`${title}\n${body}\n${historyText}`);
+    // Quotes for claims about *this post* (calls to action, narrative,
+    // disclosure...) must come from the post. Only account/repetition claims
+    // may quote the author's history - otherwise "I'm the founder" said in
+    // another post would count as a disclosure here, which is exactly the
+    // undisclosed case we must not miss.
+    const postHaystack = normalizeForMatch(`${title}\n${body}`);
+    const historyHaystack = historyText ? normalizeForMatch(historyText) : "";
+    const haystackFor = (category: SignalCategory) =>
+      HISTORY_QUOTE_CATEGORIES.has(category) ? `${postHaystack}\n${historyHaystack}` : postHaystack;
     const minConfidence = this.options.minConfidence ?? 0.6;
 
     const retracted = new Set<string>();
@@ -168,9 +178,9 @@ export class LlmWitnessProvider implements AnalysisProvider {
       const criterion = this.criteriaById.get(claim.id);
       if (!criterion || present.has(claim.id) || retracted.has(claim.id)) continue;
       if (claim.confidence < minConfidence) continue;
-      if (!haystack.includes(normalizeForMatch(claim.quote))) {
+      if (!haystackFor(criterion.category).includes(normalizeForMatch(claim.quote))) {
         rejected++;
-        continue; // quote not in the post: the model may not invent evidence
+        continue; // quote not in the post (or, for history criteria, the history): no invented evidence
       }
       // Lower model confidence -> reduced weight; the category caps still apply.
       const factor = claim.confidence >= 0.85 ? 1 : 0.6;
@@ -191,7 +201,7 @@ export class LlmWitnessProvider implements AnalysisProvider {
     for (const obs of output.observations) {
       if (observations >= MAX_OBSERVATIONS) break;
       if (obs.confidence < minConfidence) continue;
-      if (!haystack.includes(normalizeForMatch(obs.quote))) {
+      if (!`${postHaystack}\n${historyHaystack}`.includes(normalizeForMatch(obs.quote))) {
         rejected++;
         continue;
       }
@@ -266,7 +276,7 @@ function buildSystemPrompt(criteria: Criterion[]): string {
     "3. Judge intent, not keywords. A description (\"one-click install from the Store\") is not a call to action; an instruction to the reader (\"download it here\") is. A question (\"where did your first 100 users come from?\") is not an offer.",
     "4. Counter-signals matter: honest limitations, balanced comparisons, useful advice with nothing to buy.",
     "5. If a rule signal listed under `ruleSignals` is a false positive, add its id to `retract` with a short reason. Only retract when you are confident.",
-    "6. When an `author history` section is present, it lists the author's other recent public posts and comments. You may cite account/repetition criteria from it - quoting a history title or excerpt verbatim - for example the same product posted across several communities, or the author calling it their own elsewhere. Do not speculate beyond what is listed.",
+    "6. When an `author history` section is present, it lists the author's other recent public posts and comments. You may cite account/repetition criteria from it - quoting a history title or excerpt verbatim - for example the same product posted across several communities, or the author calling it their own elsewhere. Never use history text for disclosure claims: a disclosure only counts if it is in THIS post. Do not speculate beyond what is listed.",
     "7. Do not label anyone a scammer, liar, shill, or marketer. Notes must be neutral observations.",
     "8. When unsure, omit the claim. Fewer, well-supported claims beat many weak ones.",
     "9. `observations` is your own channel for anything promotional or organic that the catalogue does not name (an unusual pattern, a tell, a sign of genuineness). Each needs a verbatim quote, a direction, a short neutral note and a confidence. They count a little, never a lot.",

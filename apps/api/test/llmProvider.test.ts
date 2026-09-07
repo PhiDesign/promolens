@@ -178,6 +178,30 @@ describe("LlmWitnessProvider", () => {
     expect(ids).not.toContain("account.repeats-domain");
   });
 
+  it("a disclosure quoted from the author's history does not count as a disclosure in this post", async () => {
+    const undisclosed: AnalyzeRequest = {
+      post: {
+        title: "My exact content workflow",
+        body: "Step 3: run it through Rankforge (https://rankforge.io/?ref=maya) which changed everything.",
+        links: ["https://rankforge.io/?ref=maya"],
+        authorHistory: {
+          author: "maya",
+          fetchedAt: Date.now(),
+          available: true,
+          submissions: [{ subreddit: "Entrepreneur", title: "We built Rankforge", excerpt: "I am the founder of Rankforge and we built this." }],
+          comments: [],
+        },
+      },
+      localSignals: [],
+    };
+    const provider = new LlmWitnessProvider(
+      fakeClient(JSON.stringify({ signals: [{ id: "disclosure.employment", quote: "I am the founder of Rankforge", confidence: 0.95 }] })),
+    );
+    const result = await provider.analyze(undisclosed, ctrl());
+    expect(result.signals.map((s) => s.id)).not.toContain("disclosure.employment");
+    expect(result.disclosure).toBe("missing");
+  });
+
   it("rejects malformed model output so nothing gets cached", async () => {
     await expect(new LlmWitnessProvider(fakeClient("Sure! Here is my analysis...")).analyze(founderAdvice, ctrl())).rejects.toThrow(/JSON/);
     await expect(new LlmWitnessProvider(fakeClient('{"signals":"nope"}')).analyze(founderAdvice, ctrl())).rejects.toThrow(/shape/);
