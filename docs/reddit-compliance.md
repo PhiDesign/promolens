@@ -50,6 +50,13 @@ Shown by Reddit before app creation. Points that matter for PromoLens:
 
 Consequence: the OAuth migration depends on an approved access request, not just on a client ID. Submit the non-commercial request first; keep the paid-tier question for a separate, later ticket, but do not hide the intent.
 
+## Access request log
+
+- **2026-09-07 - request #18416631 submitted** (non-commercial Data API access, developer form, "app not supported by Devvit").
+- **2026-09-07 - denied** the same day, form reply: "not in compliance with Reddit's Responsible Builder Policy and/or lacks necessary details." No specifics given.
+- Likely weaknesses of that submission, to fix before resubmitting: (1) the source-code link pointed at a private repository (404 for the reviewer); (2) no registered app / client id was referenced; (3) the description mentioned an optional third-party language-model provider - a reviewer reads that as sharing Reddit data with a third party; (4) "reads the author's recent public posts and comments" can read as user profiling under the "zero tolerance for privacy violations" section unless framed as spam/repeat-promotion detection of the *post's author* only; (5) no public privacy policy URL.
+- Plan: public repo + privacy policy page + registered app first; describe the public build as rules-only in the browser (no third party), with the history check framed precisely; then resubmit. Personal use is unaffected (page-session reads continue).
+
 ## Why the design already helps
 
 The terms repeatedly penalise crawling, excessive use, retention beyond need, and surveillance. PromoLens analyses one post per explicit click, never scans feeds automatically, keeps only short-lived caches, and phrases every result as an estimate about a post rather than a claim about a person. Those choices are the main reason the remaining work is a migration (OAuth) and a policy decision (model provider), not a redesign.
