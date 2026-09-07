@@ -143,11 +143,45 @@ async function runPipeline(record: PostRecord, settings: Settings, token: Cancel
       return; // background worker already cached it
     }
     // API unavailable or malformed: show the local result (its confidence
-    // already reflects the limited evidence).
+    // already reflects the limited evidence) and say why in the card footer.
+    result = withEnrichFailure(result, enriched ? enriched.reason : "no_response");
+    pageCache.set(hash, result);
   }
 
   if (!cached?.result) void send({ type: "CACHE_PUT", hash, result });
   finish(record, result, token);
+}
+
+/** Attach a zero-weight note explaining why deeper analysis did not happen. */
+function withEnrichFailure(result: AnalysisResult, reason: string): AnalysisResult {
+  return {
+    ...result,
+    signals: [
+      ...result.signals.filter((s) => s.id !== "api.enrich-failed"),
+      {
+        id: "api.enrich-failed",
+        category: "availability",
+        explanation: `Deeper analysis was not applied (${describeEnrichFailure(reason)})`,
+        weight: 0,
+        evidenceSource: "api",
+        verified: true,
+        affects: ["confidence"],
+        strength: "info",
+      },
+    ],
+  };
+}
+
+export function describeEnrichFailure(reason: string): string {
+  if (reason === "api_disabled") return "deeper analysis is switched off";
+  if (reason === "timeout") return "the API took too long to answer";
+  if (reason === "invalid_response" || reason === "invalid_json") return "the API returned an unexpected answer";
+  if (reason === "no_response") return "the background worker did not answer";
+  if (/^http_5/.test(reason)) return "the API reported a server error";
+  if (/^http_429/.test(reason)) return "the API is rate limited";
+  if (/^http_/.test(reason)) return `the API answered ${reason.replace("_", " ")}`;
+  if (reason === "unreachable" || reason === "network") return "the API is not running or not reachable";
+  return reason.replace(/_/g, " ");
 }
 
 function unavailableHistory(author: string, reason: string): AuthorHistory {

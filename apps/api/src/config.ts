@@ -36,13 +36,13 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
     allowedOrigins: origins,
     rateLimitPerMinute: num(env.RATE_LIMIT_PER_MINUTE, 60),
     maxBodyBytes: num(env.MAX_BODY_BYTES, 262_144),
-    requestTimeoutMs: num(env.REQUEST_TIMEOUT_MS, 8_000),
+    requestTimeoutMs: num(env.REQUEST_TIMEOUT_MS, 50_000),
     cacheTtlMs: num(env.CACHE_TTL_HOURS, 24) * 60 * 60 * 1000,
     provider: (env.ANALYSIS_PROVIDER ?? "mock").trim().toLowerCase() || "mock",
     providerApiKey: env.ANALYSIS_PROVIDER_API_KEY?.trim() || undefined,
     llmModel: env.LLM_MODEL?.trim() || undefined,
     llmBaseUrl: env.LLM_BASE_URL?.trim() || undefined,
-    llmTimeoutMs: num(env.LLM_TIMEOUT_MS, 6_000),
+    llmTimeoutMs: num(env.LLM_TIMEOUT_MS, 45_000),
     logRawContent: (env.LOG_RAW_CONTENT ?? "false").toLowerCase() === "true",
   };
 }

@@ -109,6 +109,9 @@ const NAME_STOPWORDS = new Set([
   "store", "windows", "microsoft", "apple", "google", "android", "ios", "mac", "macos", "linux", "chrome", "safari", "firefox",
   "play", "web", "desktop", "mobile", "cloud", "beta", "alpha", "version", "program", "programme", "show", "guide", "space",
   "english", "french", "german", "spanish", "american", "european", "internet", "wifi", "bluetooth", "usb",
+  // capitalised ordinary words that start lines or bullets
+  "closed", "open", "update", "edit", "note", "tldr", "tl;dr", "thanks", "hello", "hi", "hey", "yes", "no", "ok", "okay",
+  "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "january", "february", "march", "april", "june", "july", "august", "september", "october", "november", "december",
 ]);
 
 /**

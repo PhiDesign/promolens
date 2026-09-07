@@ -1,10 +1,17 @@
 /**
- * Generates the extension icons as PNG files at build time, so no binary
- * assets need to be committed. Draws a simple ring with a centre dot.
+ * Extension icons.
+ *
+ * If you provide your own logo, put PNG files named icon16.png, icon32.png,
+ * icon48.png and icon128.png in apps/extension/public/icons/ - the build
+ * copies them as-is. Otherwise the build draws a simple ring with a centre
+ * dot at build time, so no binary assets need to be committed.
  */
-import { mkdir, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { access, copyFile, mkdir, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import zlib from "node:zlib";
+
+const CUSTOM_ICON_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "public", "icons");
 
 const CRC_TABLE = new Uint32Array(256).map((_, n) => {
   let c = n;
@@ -70,5 +77,19 @@ export function makeIconPng(size) {
 
 export async function generateIcons(dir, sizes = [16, 32, 48, 128]) {
   await mkdir(dir, { recursive: true });
-  for (const s of sizes) await writeFile(join(dir, `icon${s}.png`), makeIconPng(s));
+  let custom = 0;
+  for (const s of sizes) {
+    const own = join(CUSTOM_ICON_DIR, `icon${s}.png`);
+    const target = join(dir, `icon${s}.png`);
+    try {
+      await access(own);
+      await copyFile(own, target);
+      custom++;
+    } catch {
+      await writeFile(target, makeIconPng(s)); // no custom file for this size: draw the default ring
+    }
+  }
+  if (custom && custom < sizes.length) {
+    console.warn(`icons: ${custom} custom PNG(s) found in public/icons, the other sizes use the default ring - provide all of ${sizes.map((s) => `icon${s}.png`).join(", ")}`);
+  }
 }

@@ -10,7 +10,7 @@ import { warn } from "./debug.js";
 
 const DEFAULT_TIMEOUT_MS = 1_500;
 const TIMEOUTS: Partial<Record<Message["type"], number>> = {
-  ENRICH: 30_000, // API client itself times out at 25 s; leave headroom
+  ENRICH: 60_000, // API client itself times out at 55 s; leave headroom
   HISTORY_GET: 12_000, // three Reddit listing requests
   POST_GET: 12_000, // one Reddit listing request
 };

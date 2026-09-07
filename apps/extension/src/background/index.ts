@@ -23,9 +23,10 @@ const cache = new ResultCache(chromeLocalStore());
 const historyCache = new HistoryCache(chromeLocalStore());
 /** In-flight history fetches, so two quick clicks on the same author share one request. */
 const historyInFlight = new Map<string, Promise<HistoryResponse>>();
-// A language-model provider takes ~4-8 s per post; the mock answers in ms.
-// The ring already shows the local score, so a slow enrichment is not blocking.
-const API_TIMEOUT_MS = 25_000;
+// A large language model can take 10-40 s per post (big prompt: criteria,
+// post, comments, author history); the mock answers in ms. Must exceed the
+// API's own LLM_TIMEOUT_MS so the server's answer (or 502) arrives first.
+const API_TIMEOUT_MS = 55_000;
 const api = new ApiClient(API_TIMEOUT_MS, 2);
 
 async function ttlMs(): Promise<number> {

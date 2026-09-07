@@ -134,6 +134,15 @@ describe("disclosure", () => {
     expect(r.disclosure).toBe("unclear");
   });
 
+  it("an organic post with one incidental product mention has nothing to disclose", () => {
+    const r = analyzePost({
+      title: "How do you structure a monorepo?",
+      body: "We keep everything on GitHub and use Closed for issue tracking alongside it. Curious how others split packages; no links, just asking.",
+    });
+    expect(r.promoLikelihood).toBeLessThan(20);
+    expect(r.disclosure).toBe("unknown");
+  });
+
   it("no product and no promotion yields unknown disclosure", () => {
     const r = analyzePost({ title: "How do you deal with burnout?", body: "Genuinely asking. Nothing seems to help lately." });
     expect(r.disclosure).toBe("unknown");

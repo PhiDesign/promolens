@@ -295,7 +295,7 @@ function buildUserPrompt(post: AnalyzeRequest["post"], ruleSignals: Signal[], ma
     "",
     links.length ? `visible links:\n${links.map((l) => `- ${l}`).join("\n")}` : "visible links: none",
     "",
-    summarizeHistory(post.authorHistory),
+    summarizeHistory(post.authorHistory, 15), // keep the prompt small: slow models time out on long ones
     "",
     "ruleSignals (already detected by pattern rules; retract any that are false positives):",
     rules || "- none",

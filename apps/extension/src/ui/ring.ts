@@ -1,8 +1,8 @@
 /**
  * The score ring: a 22px button inside its own Shadow DOM.
  *
- * States: idle (gray outline, "?"), analyzing (gray, animated), green, amber,
- * red, error (gray).
+ * States: idle (gray outline, "?"), analyzing (gray, animated), green, blue
+ * (disclosed promotion), amber (uncertain), red, error (gray).
  * Interaction: in the idle/error state, click (or Enter/Space) starts the
  * analysis via `onActivate`. With a result, hover/focus opens the popover and
  * click pins it open so touchpad and keyboard users can read it; Escape closes.

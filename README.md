@@ -38,9 +38,9 @@ PromoLens keeps four ideas separate on purpose:
 | **Confidence** | low / medium / high | How much independent, verifiable evidence was actually available. |
 | **Reach** | low / medium / high | How widely the post is seen (votes, comments, age). **Reach is never evidence of promotion.** |
 
-A post can be highly promotional *and* transparent. "I built this product, try it here" scores around 90% promotional with **clear** disclosure and **low** undisclosed-promotion risk (amber ring). The same pitch with no disclosure would be a red ring.
+A post can be highly promotional *and* transparent. "I built this product, try it here" scores around 90% promotional with **clear** disclosure and **low** undisclosed-promotion risk (blue ring). The same pitch with no disclosure would be a red ring.
 
-Ring states: gray dashed **?** = not analysed, click to analyse · gray (animated) = analysing · green = low likelihood · amber = clearly disclosed promotion or an uncertain middle score · red = high likelihood with missing/unclear disclosure · gray **-** = analysis unavailable (click to retry).
+Ring states: gray dashed **?** = not analysed, click to analyse · gray (animated) = analysing · green = low likelihood · blue = promotional and clearly disclosed (informational, not a warning) · amber = uncertain middle score without a clear disclosure · red = high likelihood with missing/unclear disclosure · gray **-** = analysis unavailable (click to retry).
 
 Why on-demand and post-page only? The strongest evidence (full body, comments, the author's replies) only exists on the post page; one click per post keeps model costs to cents; and nothing about your browsing is analysed or sent unless you explicitly ask for that one post.
 
@@ -77,6 +77,10 @@ npm run dev:api                 # http://127.0.0.1:8787
 In the toolbar popup, enable **Deeper analysis (language model)**, then click **Check connection**. If the API is unavailable or returns something malformed, the extension keeps the local rule-based result.
 
 Never put a provider key in the extension. Provider secrets belong only in `apps/api/.env`, which Git ignores.
+
+### Your own logo
+
+The build draws a default ring icon. To use your own, drop four PNGs into `apps/extension/public/icons/` named `icon16.png`, `icon32.png`, `icon48.png` and `icon128.png` (square, transparent background works best), then run `npm run build` and reload the extension. The toolbar icon, the `chrome://extensions` card and the popup header all use them. The **?** ring injected into Reddit pages is drawn separately (`apps/extension/src/ui/ring.ts`) and is not affected.
 
 ## Development commands
 
@@ -144,7 +148,7 @@ The API ships with a deterministic `mock` provider. To let a model act as an evi
 3. Start the API: `npm run dev:api`. The startup line shows the provider and model.
 4. In the extension popup switch on **Deeper analysis (language model)** and click **Check connection** - it should report the provider as `openai:<model>`.
 
-From then on, clicking the **?** on a post page sends that post (and only that post) to your API; results are cached for 24 h by content hash. If the model call fails or returns something malformed, the ring keeps the local rule-based score. Read `docs/privacy.md` before enabling: the text of posts you analyse leaves your machine for the model provider.
+From then on, clicking the **?** on a post page sends that post (and only that post) to your API; results are cached for 24 h by content hash. Expect 10-40 s per post with a large model (the prompt includes the post, comments and author history); a "mini" model answers in a few seconds. If the model exceeds `LLM_TIMEOUT_MS` (45 s by default) the API answers 502 and the ring shows the local result. If the model call fails or returns something malformed, the ring keeps the local rule-based score. Read `docs/privacy.md` before enabling: the text of posts you analyse leaves your machine for the model provider.
 
 Never paste a key into chat tools, issues, or commits. `apps/api/.env` is git-ignored.
 

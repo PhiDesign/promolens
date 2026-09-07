@@ -7,6 +7,7 @@
 export const THEME_VARS = `
   :host {
     --pl-green: #2e9e5b;
+    --pl-blue: #2f6fdb;
     --pl-amber: #c98a00;
     --pl-red: #d1433b;
     --pl-gray: #8f949a;
@@ -20,6 +21,7 @@ export const THEME_VARS = `
   }
   :host([data-theme="dark"]) {
     --pl-green: #4cc27a;
+    --pl-blue: #6aa1ff;
     --pl-amber: #f2b233;
     --pl-red: #ef6b63;
     --pl-gray: #9aa0a6;
@@ -117,6 +119,7 @@ export const RING_CSS = `
   /* Three digits ("100") must clear the 2.5px stroke inside the 24px ring. */
   .num[data-len="3"] { font-size: 7px; letter-spacing: -0.2px; }
   :host([data-state="green"]) { --pl-color: var(--pl-green); }
+  :host([data-state="blue"]) { --pl-color: var(--pl-blue); }
   :host([data-state="amber"]) { --pl-color: var(--pl-amber); }
   :host([data-state="red"]) { --pl-color: var(--pl-red); }
   :host([data-state="analyzing"]) .arc,
@@ -193,6 +196,7 @@ export const POPOVER_CSS = `
   li { margin: 2px 0; }
   .foot { color: var(--pl-muted); font-size: 11px; margin: 0; font-style: italic; }
   .card[data-state="green"] { --pl-color: var(--pl-green); }
+  .card[data-state="blue"] { --pl-color: var(--pl-blue); }
   .card[data-state="amber"] { --pl-color: var(--pl-amber); }
   .card[data-state="red"] { --pl-color: var(--pl-red); }
 `;

@@ -22,20 +22,22 @@ export function confidenceLabel(c: ConfidenceLevel): string {
   return `${c.charAt(0).toUpperCase()}${c.slice(1)} confidence`;
 }
 
-export type RingState = "idle" | "analyzing" | "green" | "amber" | "red" | "error";
+export type RingState = "idle" | "analyzing" | "green" | "blue" | "amber" | "red" | "error";
 
 /**
  * Ring colour rules:
  *  idle   - not analysed yet (gray outline; click to analyse)
  *  green  - low promotional likelihood
- *  amber  - clearly disclosed promotion, or an uncertain middle score
+ *  blue   - promotional and clearly disclosed (informational, not a warning)
+ *  amber  - uncertain middle score without a clear disclosure: look closer
  *  red    - high promotional likelihood with missing/unclear disclosure
  */
 export function ringStateFor(result: Pick<AnalysisResult, "promoLikelihood" | "disclosure">): RingState {
   const s = result.promoLikelihood;
   if (s < 40) return "green";
+  if (result.disclosure === "clear") return "blue";
   if (s < 60) return "amber";
-  return result.disclosure === "clear" ? "amber" : "red";
+  return "red";
 }
 
 /** Short, restrained text for screen readers. */

@@ -184,14 +184,17 @@ export function computeDisclosure(signals: Signal[], score: number): DisclosureS
   if (hasClear && buried) return "unclear";
   if ([...UNCLEAR_IDS].some((id) => ids.has(id))) return "unclear";
 
-  // Something to disclose? Only when there is commercial/product evidence.
+  // Something to disclose? Only when there is commercial/product evidence
+  // *and* the post reads as at least somewhat promotional. A single medium
+  // signal on an otherwise organic post ("X mentioned next to GitHub") is not
+  // a missing disclosure - there is nothing to disclose.
   const commercial = signals.some(
     (s) =>
       s.affects.includes("promotion") &&
       s.weight >= 8 &&
       ["direct-cta", "links", "workflow", "account", "community-evidence", "comment-behavior"].includes(s.category),
   );
-  if (commercial || score >= 40) return "missing";
+  if ((commercial && score >= 20) || score >= 40) return "missing";
   return "unknown";
 }
 

@@ -2,17 +2,16 @@ import { describe, expect, it } from "vitest";
 import { sourceNote } from "../src/ui/popover.js";
 
 describe("sourceNote", () => {
-  it("says local rules only for browser results", () => {
-    expect(sourceNote({ source: "local", signals: [] })).toMatch(/^Local rules only\./);
+  it("says local rules for browser results, including a failed model step", () => {
+    expect(sourceNote({ source: "local", signals: [] })).toBe("Local rules · estimate");
+    expect(sourceNote({ source: "local", signals: [{ id: "api.enrich-failed", explanation: "x" }] })).toBe("Local rules · estimate");
   });
-  it("names the model when the API used a language-model witness", () => {
-    const note = sourceNote({
-      source: "api",
-      signals: [{ id: "api.llm-witness", explanation: "A language model (openai:test-model) reviewed the post text; 2 claim(s)..." }],
-    });
-    expect(note).toMatch(/^Rules \+ language model \(openai:test-model\)\./);
+
+  it("says rules + AI when a language model contributed", () => {
+    expect(sourceNote({ source: "api", signals: [{ id: "api.llm-witness", explanation: "A language model (openai:m) reviewed..." }] })).toBe("Local rules + AI · estimate");
   });
-  it("says rules via API for the mock provider", () => {
-    expect(sourceNote({ source: "api", signals: [{ id: "api.mock-provider", explanation: "x" }] })).toMatch(/^Rules via local API\./);
+
+  it("the mock provider is still just rules", () => {
+    expect(sourceNote({ source: "api", signals: [{ id: "api.mock-provider", explanation: "x" }] })).toBe("Local rules · estimate");
   });
 });

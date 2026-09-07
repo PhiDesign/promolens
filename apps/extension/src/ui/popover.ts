@@ -12,17 +12,10 @@ import { confidenceLabel, disclosureLabel, ringStateFor, verdictFor, type Analys
 import { POPOVER_CSS } from "./styles.js";
 import { detectTheme } from "./theme.js";
 
-const ESTIMATE_NOTE = "This is an estimate based on observable signals.";
-
-/** Tells the reader what produced the estimate: local rules, or rules plus a model. */
+/** One short line: what produced the result, and that it is an estimate. */
 export function sourceNote(result: { source: "local" | "api"; signals: { id: string; explanation: string }[] }): string {
-  if (result.source !== "api") return `Local rules only. ${ESTIMATE_NOTE}`;
-  const witness = result.signals.find((s) => s.id === "api.llm-witness");
-  if (witness) {
-    const m = /\(([^)]+)\)/.exec(witness.explanation);
-    return `Rules + language model${m ? ` (${m[1]})` : ""}. ${ESTIMATE_NOTE}`;
-  }
-  return `Rules via local API. ${ESTIMATE_NOTE}`;
+  const usedModel = result.source === "api" && result.signals.some((s) => s.id === "api.llm-witness" || s.id === "api.llm-direct");
+  return `${usedModel ? "Local rules + AI" : "Local rules"} · estimate`;
 }
 
 export class PopoverController {
