@@ -117,6 +117,19 @@ describe("disclosure detectors", () => {
     expect(ids({ title: "x", body: "And then it turned into a project." })).toContain("disclosure.creator");
   });
 
+  it("recognises 'we built <ProductName>' and 'a tool we built' as creator disclosure", () => {
+    expect(ids({ title: "Just keep building", body: "A year ago, we built QuickDesign just for our own e-commerce brands." })).toContain("disclosure.creator");
+    expect(ids({ title: "x", body: "QuickDesign started as a tool we built to solve our own problem." })).toContain("disclosure.creator");
+    expect(ids({ title: "x", body: "I created a local STT tool called Mumbleflow." })).toContain("disclosure.creator");
+  });
+
+  it("a bare 'my SaaS' in a post that promotes no product is not a disclosure", () => {
+    const asking = ids({ title: "What AI tool can I use to make demo videos?", body: "I need a short launch video for my SaaS, but it has to show the real product UI. Has anyone found a tool that works?" });
+    expect(asking).not.toContain("disclosure.creator");
+    // ...but with a named product it still counts
+    expect(ids({ title: "x", body: "CallBuddy is a desktop app from my company. It is live now." })).toContain("disclosure.creator");
+  });
+
   it("detects employment disclosure with an indefinite article", () => {
     expect(ids({ title: "x", body: "Disclosure: I work for a company that makes a spreadsheet tool." })).toContain("disclosure.employment");
   });

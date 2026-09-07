@@ -64,6 +64,32 @@ describe("verdictFor", () => {
     expect(accessibleSummary(r)).toMatch(/^PromoLens: Possible undisclosed promotion\. Elsewhere the author/);
   });
 
+  it("a founder story that names 'we built X' is transparent, even when history shows the product elsewhere", () => {
+    const history: AuthorHistory = {
+      author: "otta",
+      fetchedAt: Date.now(),
+      available: true,
+      submissions: [
+        { subreddit: "dropshipping", title: "QuickDesign for stores", excerpt: "We built QuickDesign, our own tool." },
+        { subreddit: "microsaas", title: "QuickDesign update" },
+        { subreddit: "facebookads", title: "Made this with QuickDesign" },
+      ],
+      comments: [],
+    };
+    const r = analyzePost({
+      title: "Just keep building. Don't give up. 1 year success story",
+      body:
+        "A year ago, we built QuickDesign just for our own e-commerce brands. This week it ended up at one of the biggest e-commerce summits. " +
+        "Most projects don't look impressive in the beginning. QuickDesign started as a tool we built to solve our own problem. A year later we're showcasing it. Keep going. Keep shipping.",
+      authorHistory: history,
+    });
+    const v = verdictFor(r);
+    expect(r.disclosure).toBe("clear");
+    expect(v.kind).toBe("transparent");
+    expect(v.hiddenConnection).toBe(false);
+    expect(v.technique ?? "").not.toMatch(/does not say so/);
+  });
+
   it("vague connection wording gives the unclear verdict", () => {
     const r = analyzePost({ title: "Something I have been working on", body: "Something I have been working on: NoteBeam. Sign up at https://notebeam.app to get early access.", links: ["https://notebeam.app"] });
     expect(verdictFor(r).kind).toBe("unclear");

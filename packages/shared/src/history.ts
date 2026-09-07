@@ -18,7 +18,7 @@
  * posts across 5 communities"), never a label for the person. When no history
  * is available the engine says so and confidence stays low.
  */
-import { CLEAR_AFFILIATE_RE, CLEAR_CREATOR_RE, CLEAR_EMPLOYMENT_RE, makeSignal } from "./detectors.js";
+import { CLEAR_AFFILIATE_RE, CLEAR_CREATOR_RE, CLEAR_EMPLOYMENT_RE, CREATOR_NAMED_RE, CREATOR_RELATIVE_RE, makeSignal } from "./detectors.js";
 import { domainOf, escapeRegExp, normalizeWhitespace } from "./text.js";
 import type { AuthorHistory, HistoryComment, HistorySubmission, PostInput, Signal } from "./types.js";
 
@@ -282,7 +282,12 @@ function findSelfIdentification(
   items: { text: string; where: string; when?: number; url?: string }[],
 ): { where: string; when?: number; excerpt: string; url?: string } | undefined {
   for (const item of items) {
-    const m = CLEAR_CREATOR_RE.exec(item.text) ?? CLEAR_EMPLOYMENT_RE.exec(item.text) ?? CLEAR_AFFILIATE_RE.exec(item.text);
+    const m =
+      CREATOR_NAMED_RE.exec(item.text) ??
+      CREATOR_RELATIVE_RE.exec(item.text) ??
+      CLEAR_CREATOR_RE.exec(item.text) ??
+      CLEAR_EMPLOYMENT_RE.exec(item.text) ??
+      CLEAR_AFFILIATE_RE.exec(item.text);
     if (m) {
       const start = Math.max(0, m.index - 20);
       return { where: item.where, when: item.when, excerpt: normalizeWhitespace(item.text.slice(start, start + 90)), url: item.url };

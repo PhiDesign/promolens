@@ -290,9 +290,16 @@ function formatAge(hours: number): string {
 
 /** Pick the three strongest human-readable reasons. */
 export function pickReasons(weighted: WeightedSignal[], signals: Signal[], disclosure: DisclosureStatus, score: number): string[] {
+  // Strongest evidence first. For an organic-looking result, lead with what
+  // made it organic (the counter-signals) rather than the promotional hints
+  // they outweighed, so the reasons agree with the verdict.
+  const organic = score < 40;
   const ranked = [...weighted]
     .filter((ws) => Math.abs(ws.effectiveWeight) >= 2)
-    .sort((a, b) => Math.abs(b.effectiveWeight) - Math.abs(a.effectiveWeight));
+    .sort((a, b) => {
+      if (organic && Math.sign(a.effectiveWeight) !== Math.sign(b.effectiveWeight)) return a.effectiveWeight < 0 ? -1 : 1;
+      return Math.abs(b.effectiveWeight) - Math.abs(a.effectiveWeight);
+    });
 
   const reasons: string[] = [];
   const seen = new Set<string>();

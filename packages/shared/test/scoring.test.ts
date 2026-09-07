@@ -134,6 +134,20 @@ describe("disclosure", () => {
     expect(r.disclosure).toBe("unclear");
   });
 
+  it("an organic-looking result leads with the counter-signals, not the promotional hints they outweighed", () => {
+    const r = analyzePost({
+      title: "Before you put paying customers on your AI-built SaaS, run these six checks",
+      body:
+        "I review AI-built apps for a living, so take that bias into account, but there is no pitch here; every check below is free. " +
+        "The auth check: open your app in two browsers. The Stripe check: trigger a refund. The admin check: type /admin. The scale check: look at the network tab. " +
+        "The error check: kill your wifi mid form. The secrets check: search your chat history for keys. Happy to answer questions in the comments. " +
+        "Some tools are polished but the learning curve is steep; others are buggy at times. Depends on your needs.",
+    });
+    expect(r.promoLikelihood).toBeLessThan(40);
+    const first = r.signals.find((s) => s.explanation === r.reasons[0]);
+    expect(first?.weight ?? 0).toBeLessThan(0);
+  });
+
   it("an organic post with one incidental product mention has nothing to disclose", () => {
     const r = analyzePost({
       title: "How do you structure a monorepo?",

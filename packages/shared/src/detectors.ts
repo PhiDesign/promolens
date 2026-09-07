@@ -474,6 +474,23 @@ function detectLanguageSignals(ctx: DetectionContext): Signal[] {
 
 export const CLEAR_CREATOR_RE =
   /\b(?:i|we)\s+(?:built|made|created|developed|designed|founded|launched|coded|wrote)\s+(?:this|it|the|a|an|my|our)\b|\b(?:this is|it's|it is)\s+(?:my|our)\s+(?:product|app|tool|startup|company|project|saas|service|site|website|extension|plugin|course|book|game)\b|\b(?:my|our)\s+(?:own\s+)?(?:product|app|tool|startup|company|saas|service|extension|plugin|course|book|game)\b|\bi(?:'m| am) the (?:founder|creator|developer|co-?founder|owner|maker|author|dev|builder)\b|\b(?:built|made|created|developed|building)\s+(?:the|a|an)\s+(?:tool|app|product|platform|service|thing|extension|site)\s+(?:i|we)\s+(?:needed|wanted|wished (?:i|we) had|always wanted)\b|\b(?:we|i)(?:'ve| have)?\s+(?:been\s+)?(?:working on|building|developing)\s+(?:it|this)\s+(?:daily|every day|full[- ]time|for (?:the (?:last|past) )?(?:\d+|two|three|four|five|six) (?:years?|months?))\b|\b(?:it|this|that) turned into (?:a|our|my) (?:project|product|startup|company|business|side project)\b|\b(?:we|i) (?:launched|shipped|released) (?:it|this|the app|the tool) (?:this|last) (?:week|month)\b|\bshameless (?:self[- ]?)?(?:plug|promo)\b|\bself[- ]?promo(?:tion)?\b|\bfull disclosure\b|\bdisclaimer:?\s*(?:i|this is)\b/i;
+/**
+ * "we built QuickDesign", "I created Mumbleflow": the object is a product
+ * name, not "this/it/the". Case-sensitive on purpose - the name must be
+ * capitalised - so this stays separate from the /i regex above.
+ */
+export const CREATOR_NAMED_RE =
+  /\b(?:I|[Ww]e)\s+(?:built|made|created|developed|designed|launched|coded|wrote|started)\s+([A-Z][A-Za-z0-9.-]{2,})\b/;
+/** "a tool we built", "the app I made" - relative clause after the noun. */
+export const CREATOR_RELATIVE_RE =
+  /\b(?:tool|app|product|thing|project|service|extension|site|website|game|saas|startup|bot|plugin)\s+(?:that\s+|which\s+)?(?:i|we)(?:'ve| have)?\s+(?:built|made|created|developed|designed|launched|coded|wrote)\b/i;
+/**
+ * "my app", "our company" on its own only discloses something when the post
+ * is actually about a product (named or linked). "I need a demo video for my
+ * SaaS" is context, not a disclosure.
+ */
+export const GENERIC_POSSESSIVE_RE =
+  /\b(?:my|our)\s+(?:own\s+)?(?:product|app|tool|startup|company|saas|service|extension|plugin|course|book|game)\b/gi;
 export const CLEAR_EMPLOYMENT_RE =
   /\bi\s+(?:work|am working)\s+(?:for|at|with)\s+(?:this|the|that|a|an)?\s*(?:company|team|startup|business|firm|agency|[A-Z][\w.-]+)\b|\bi(?:'m| am) (?:an? )?(?:employee|engineer|marketer|pm|product manager|community manager|dev|developer|founder|ceo|cto)\s+(?:at|of|for)\b|\bwe(?:'re| are) the (?:team|company|people) behind\b|\bon behalf of\b/i;
 export const CLEAR_BENEFIT_RE =
@@ -502,17 +519,28 @@ export function detectDisclosure(ctx: DetectionContext): DisclosureDetection {
   let unclear = false;
   let buried = false;
 
-  const clearChecks: [string, RegExp, string][] = [
-    ["disclosure.creator", CLEAR_CREATOR_RE, "The author states they built or own the product"],
+  // Creator disclosure: explicit statements always count; a bare "my app" /
+  // "our company" only counts when the post is about a product.
+  const aboutAProduct = !!ctx.primaryProduct || ctx.productLinks.length > 0;
+  const creatorRe = [CREATOR_NAMED_RE, CREATOR_RELATIVE_RE, CLEAR_CREATOR_RE].find((re) => {
+    if (re === CLEAR_CREATOR_RE) {
+      const withoutGeneric = text.replace(GENERIC_POSSESSIVE_RE, " ");
+      return re.test(withoutGeneric) || (aboutAProduct && re.test(text));
+    }
+    return re.test(text);
+  });
+
+  const clearChecks: [string, RegExp | undefined, string][] = [
+    ["disclosure.creator", creatorRe, "The author states they built or own the product"],
     ["disclosure.employment", CLEAR_EMPLOYMENT_RE, "The author discloses working for the company"],
     ["disclosure.material-benefit", CLEAR_BENEFIT_RE, "The author discloses receiving the product for free or being paid"],
     ["disclosure.affiliate", CLEAR_AFFILIATE_RE, "The author discloses an affiliate or commission relationship"],
   ];
   for (const [id, re, explanation] of clearChecks) {
-    if (re.test(text)) {
+    if (re && re.test(text)) {
       clear = true;
       signals.push(makeSignal(id, { explanation, excerpt: firstMatch(text, re) }));
-      const pos = positionOf(text, new RegExp(re.source, "i"));
+      const pos = positionOf(text, new RegExp(re.source, re.flags.includes("i") ? "i" : ""));
       if (ctx.words > 150 && pos > 0.85) buried = true;
     }
   }

@@ -41,7 +41,7 @@ export function verdictFor(result: Pick<AnalysisResult, "promoLikelihood" | "dis
     };
   }
 
-  const technique = describeTechnique(ids, hiddenConnection);
+  const technique = describeTechnique(ids, hiddenConnection, result.disclosure === "clear");
 
   if (result.disclosure === "clear") {
     return { kind: "transparent", headline: "Transparent promotion", technique, hiddenConnection: false };
@@ -55,7 +55,7 @@ export function verdictFor(result: Pick<AnalysisResult, "promoLikelihood" | "dis
   return { kind: "undisclosed", headline: "Possibly promotional, connection not disclosed", technique, hiddenConnection };
 }
 
-function describeTechnique(ids: Set<string>, hiddenConnection: boolean): string | undefined {
+function describeTechnique(ids: Set<string>, hiddenConnection: boolean, disclosed = false): string | undefined {
   const parts: string[] = [];
 
   if (hiddenConnection) {
@@ -65,15 +65,19 @@ function describeTechnique(ids: Set<string>, hiddenConnection: boolean): string 
   const has = (...list: string[]) => list.some((id) => ids.has(id));
   let framing: string | undefined;
   if (has("workflow.only-product-linked", "workflow.obscure-among-familiar", "workflow.more-detail", "workflow.success-attributed")) {
-    framing = "Presented as a workflow in which one obscure tool gets the link and the credit";
+    framing = disclosed
+      ? "Presented as a workflow built around the author's own tool"
+      : "Presented as a workflow in which one obscure tool gets the link and the credit";
   } else if (has("story.advice-then-product")) {
-    framing = "Presented as neutral advice that ends by directing readers to a product";
+    framing = disclosed
+      ? "Presented as advice that ends at the author's own product"
+      : "Presented as neutral advice that ends by directing readers to a product";
   } else if (has("story.problem-product-success", "story.emotional-intro", "story.result-title-tool-body", "story.solves-everything")) {
-    framing = "Presented as a personal story that ends at a product";
+    framing = disclosed ? "Told as the founder's own story, ending at their product" : "Presented as a personal story that ends at a product";
   } else if (has("cta.dm-request", "cta.comment-interested")) {
     framing = "Access is withheld behind a DM or a keyword comment";
   } else if (has("story.testimonial", "lang.hype-phrases", "lang.transformation") && has("link.product-link", "link.affiliate-params", "cta.coupon")) {
-    framing = "Presented as a user's review or recommendation";
+    framing = disclosed ? "The founder's own account of the product, with a link" : "Presented as a user's review or recommendation";
   } else if (has("lang.sales-page-format", "lang.feature-focus")) {
     framing = "Reads like a product page: features listed, little discussion";
   } else if (has("cta.direct", "cta.coupon", "cta.signup-benefit", "cta.waitlist")) {
