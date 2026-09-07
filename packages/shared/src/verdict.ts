@@ -47,12 +47,25 @@ export function verdictFor(result: Pick<AnalysisResult, "promoLikelihood" | "dis
     return { kind: "transparent", headline: "Transparent promotion", technique, hiddenConnection: false };
   }
   if (result.disclosure === "unclear") {
+    // A real disclosure that most readers will miss: late in a long post, or
+    // only in the comments. Say so precisely - it is neither hidden nor upfront.
+    if (ids.has("disclosure.buried")) {
+      return { kind: "unclear", headline: "Promotion, disclosed late in the post", technique: lateTechnique(technique), hiddenConnection };
+    }
+    if (ids.has("disclosure.comments-only")) {
+      return { kind: "unclear", headline: "Promotion, disclosed only in the comments", technique, hiddenConnection };
+    }
     return { kind: "unclear", headline: "Promotion with an unclear connection", technique, hiddenConnection };
   }
   if (hiddenConnection || score >= 60) {
     return { kind: "undisclosed", headline: "Possible undisclosed promotion", technique, hiddenConnection };
   }
   return { kind: "undisclosed", headline: "Possibly promotional, connection not disclosed", technique, hiddenConnection };
+}
+
+function lateTechnique(technique: string | undefined): string {
+  const note = "The author's connection to the linked product is stated only partway through a long post, where a skimming reader will miss it";
+  return technique ? `${note}. ${technique}` : `${note}.`;
 }
 
 function describeTechnique(ids: Set<string>, hiddenConnection: boolean, disclosed = false): string | undefined {

@@ -90,6 +90,25 @@ describe("verdictFor", () => {
     expect(v.technique ?? "").not.toMatch(/does not say so/);
   });
 
+  it("a long advice post whose only disclosure sits midway is 'disclosed late', not transparent", () => {
+    const tip = (n: number) =>
+      `${n}. Tip number ${n}. Here is a genuinely useful paragraph about app store keywords, screenshots, landing pages and search intent that runs on for a while so the post is long and reads like a guide rather than a pitch. ` +
+      "Pick a name people already search for, write screenshots that show the outcome, build one landing page per search term, and measure impressions to product page views to downloads every week. ";
+    const body =
+      "Most of the growth came from stacking organic channels. " +
+      tip(1) + tip(2) + tip(3) +
+      "4. Turn one idea into hundreds of pieces of content. You can do this manually or automate it. I started manually but I have now fully automated it with my own tool called DistributionMaxx (https://distributionmaxx.com) because I now have 16 accounts. " +
+      tip(5) +
+      "Building the app isn't the hard part. Getting distribution is. Happy to answer questions.";
+    const r = analyzePost({ title: "Just hit 11.9k downloads - the 5 distribution strategies that worked", body, links: ["https://distributionmaxx.com"] });
+    expect(r.promoLikelihood).toBeGreaterThanOrEqual(60);
+    expect(r.disclosure).toBe("unclear");
+    const v = verdictFor(r);
+    expect(v.kind).toBe("unclear");
+    expect(v.headline).toBe("Promotion, disclosed late in the post");
+    expect(v.technique).toMatch(/^The author's connection to the linked product is stated only partway/);
+  });
+
   it("vague connection wording gives the unclear verdict", () => {
     const r = analyzePost({ title: "Something I have been working on", body: "Something I have been working on: NoteBeam. Sign up at https://notebeam.app to get early access.", links: ["https://notebeam.app"] });
     expect(verdictFor(r).kind).toBe("unclear");

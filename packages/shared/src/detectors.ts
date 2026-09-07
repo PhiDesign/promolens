@@ -541,7 +541,10 @@ export function detectDisclosure(ctx: DetectionContext): DisclosureDetection {
       clear = true;
       signals.push(makeSignal(id, { explanation, excerpt: firstMatch(text, re) }));
       const pos = positionOf(text, new RegExp(re.source, re.flags.includes("i") ? "i" : ""));
-      if (ctx.words > 150 && pos > 0.85) buried = true;
+      // Buried: at the very end of a medium post, or past the midpoint of a
+      // long one ("...my own tool called X" in tip 4 of 5). Readers skimming
+      // a long guide will not see it.
+      if ((ctx.words > 150 && pos > 0.85) || (ctx.words > 300 && pos > 0.5)) buried = true;
     }
   }
   if (ctx.post.brandAffiliateLabel) {
