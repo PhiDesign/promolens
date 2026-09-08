@@ -70,7 +70,9 @@ Fill in the app name / client id before sending. Keep every sentence true of the
 >
 > **Why not Devvit.** PromoLens must annotate any post the reader is viewing, in the reader's own browser, on the reader's request, without moderator installation and without acting as its own account. Devvit apps are installed per subreddit by moderators and render inside Reddit's app surfaces; they cannot add a control to arbitrary post pages in the reader's browser.
 >
-> **Subreddits.** None specifically - it acts only on the post the reader clicks. **Operating username.** None; it acts as the logged-in reader. **App.** [name / client id].
+> **Subreddits.** None specifically - it acts only on the post the reader clicks. **Operating username.** None; it acts as the logged-in reader. **App.** Not yet created: the app-creation form currently requires prior approval (it returns the Responsible Builder Policy notice). On approval I will register "PromoLens" as an *installed app* (no client secret) with redirect URI `https://ehfnofnaipjdnmniofegnlpfgaghcbmn.chromiumapp.org/oauth` and about-URL https://phidesign.github.io/promolens/.
+
+Note (2026-09-08): app creation at reddit.com/prefs/apps is blocked until a data-access request is approved, so the request must go first and the app is registered afterwards.
 
 Do not mention the optional language-model API in this request: it is a developer-only feature, off by default, that runs against a server the developer hosts; it is not part of the public build's Reddit data flow.
 
