@@ -179,7 +179,7 @@ PromoLens never reports, hides, removes, or publicly labels anyone. It uses lang
 
 - **Milestone 1 (done):** local rule-based scoring, evidence popover, mock API, tests, docs.
 - **Milestone 2 (done):** language-model witness provider; evaluation harness comparing rules / hybrid / model-only; on-demand post-page mode.
-- **Milestone 3:** validation against 100-200 manually labelled real posts; weight and prompt tuning; a free-form model observation channel (capped); correction/feedback button in the popover.
+- **Milestone 3 (in progress, 0.3.0):** done - author public history on click, verdict-first card, model observation channel (capped), comments forwarded to the model, multi-word product names, reach relative to community size, buried-disclosure verdict, Reddit developer-terms review and dormant OAuth path. Remaining - validation against 100-200 manually labelled real posts; weight and prompt tuning from them; correction/feedback button in the popover.
 - **Later:** official Reddit API enrichment (author history, cross-posts) behind the existing disabled interface, once authorised access and a policy review exist; subreddit-relative reach; localisation.
 
 Not planned: payments, accounts, automatic reporting/hiding, moderator dashboards, website-ranking checks, profile crawling.

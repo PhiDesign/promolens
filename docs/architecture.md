@@ -183,6 +183,8 @@ The `PostInput` / `Signal` model already contains the profile, history and repet
 5. The merged signals go through `scoreSignals` - same caps, same correlation discounts, same floor, same reach separation. The model never outputs a number, so five hype phrases from the model are capped at 15 points just like five from the regexes.
 6. Anything malformed from the model raises an error: the API answers 502, nothing is cached, and the extension keeps its local score.
 
+The model sees the post, up to 20 visible comments (the author's replies marked), and the author-history summary. Quotes are checked against the right source: post-level claims (disclosure, calls to action, narrative) must quote the post; account/repetition claims may quote the history; thread claims may quote the comments. A commenter's words or the author's statement in another post can therefore never become this post's disclosure.
+
 The model also has a channel of its own, `observations`: anything promotional or organic it notices that the catalogue does not name, each with a verbatim quote (from the post or the fetched history), a direction and a short neutral note. They become `model.observation` signals worth ±8 each, at most three, in a category capped at 15 points - the model's eyes and judgment, without the pen. When author history was fetched, the model sees its summary and may cite account/repetition criteria from it, quoting the history titles or excerpts.
 
 `openai.ts` is the transport: one POST to any OpenAI-compatible `/chat/completions` endpoint, JSON output, timeout, and error messages that never include post content or the key. Tests use a fake client, so the suite never touches the network.
