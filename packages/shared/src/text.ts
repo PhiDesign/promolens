@@ -136,16 +136,56 @@ export function findNameCandidates(text: string, linkedDomains: string[] = []): 
     bump(m[1]!.charAt(0).toUpperCase() + m[1]!.slice(1).toLowerCase());
   }
 
-  // Capitalised words that are not at the start of a sentence
+  // Multi-word names: runs of 2-3 capitalised words ("Advisory Guide",
+  // "Tensor Space"). Counted as one name; their component words are removed
+  // from the single-word counts below so "Advisory" does not compete with
+  // "Advisory Guide".
   const sentences = splitSentences(text);
+  const clean = (raw: string) => raw.replace(/^[("'\[]+|[)"'\],.!?:;]+$/g, "");
+  const isCap = (w: string) => /^[A-Z][a-zA-Z0-9]{1,}$/.test(w) && !/^[A-Z]+$/.test(w);
+  const phrases = new Map<string, number>();
+  for (const s of sentences) {
+    const words = s.split(/\s+/).map(clean);
+    let i = 0;
+    while (i < words.length) {
+      if (!isCap(words[i]!) || NAME_STOPWORDS.has(words[i]!.toLowerCase())) {
+        i++;
+        continue;
+      }
+      let j = i + 1;
+      while (j < words.length && j - i < 3 && isCap(words[j]!)) j++;
+      if (j - i >= 2) {
+        const phrase = words.slice(i, j).join(" ");
+        // skip phrases made only of stop-listed/generic words
+        if (!words.slice(i, j).every((w) => NAME_STOPWORDS.has(w.toLowerCase()))) {
+          phrases.set(phrase, (phrases.get(phrase) ?? 0) + 1);
+        }
+      }
+      i = j;
+    }
+  }
+
+  // Capitalised words that are not at the start of a sentence
   const initial = new Map<string, number>();
   for (const s of sentences) {
     const words = s.split(/\s+/);
     for (let i = 0; i < words.length; i++) {
-      const w = words[i]!.replace(/^[("'\[]+|[)"'\],.!?:;]+$/g, "");
+      const w = clean(words[i]!);
       if (!/^[A-Z][a-zA-Z0-9]{2,}$/.test(w) || /^[A-Z]+$/.test(w)) continue;
       if (i === 0) initial.set(w, (initial.get(w) ?? 0) + 1);
       else bump(w);
+    }
+  }
+  // Fold phrases in: count the phrase, and take its words out of the singles.
+  for (const [phrase, n] of phrases) {
+    counts.set(phrase, (counts.get(phrase) ?? 0) + n);
+    for (const w of phrase.split(" ")) {
+      const cur = counts.get(w);
+      if (cur === undefined) continue;
+      if (cur - n <= 0) counts.delete(w);
+      else counts.set(w, cur - n);
+      const init = initial.get(w);
+      if (init !== undefined) initial.set(w, Math.max(0, init - n));
     }
   }
   // Sentence-initial words count when the same name also appears mid-sentence,

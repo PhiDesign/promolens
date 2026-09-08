@@ -62,6 +62,26 @@ describe("direct promotional detectors", () => {
   });
 });
 
+describe("product name candidates", () => {
+  it("keeps multi-word names whole and does not count their parts separately", () => {
+    const { context } = detectAll({
+      title: "Got into the Microsoft Store. Now what?",
+      body: "That turned into Advisory Guide, a Windows app. Tensor Space (my company) got into the NVIDIA Inception program. Advisory Guide passed certification this week.",
+    });
+    expect(context.names.get("Advisory Guide")).toBe(2);
+    expect(context.names.has("Advisory")).toBe(false);
+    expect(context.names.has("Guide")).toBe(false);
+    expect(context.names.get("Tensor Space")).toBe(1);
+    expect(context.primaryProduct).toBe("Advisory Guide");
+  });
+
+  it("still finds single-word and CamelCase names", () => {
+    const { context } = detectAll({ title: "x", body: "I switched to Rankforge last month. Rankforge and NotionAI both work." });
+    expect(context.names.get("Rankforge")).toBe(2);
+    expect(context.names.get("NotionAI")).toBeGreaterThanOrEqual(1);
+  });
+});
+
 describe("narrative and workflow detectors", () => {
   it("detects repeated product naming", () => {
     const body = "Zentrack is great. Zentrack does X. Zentrack does Y. With Zentrack you get Z. Zentrack again. Zentrack forever.";
