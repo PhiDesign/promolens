@@ -1,0 +1,6 @@
+title: PromoLens
+description: Open-source Chrome extension that estimates, on request, how likely a Reddit post is to be promotional. Not affiliated with Reddit.
+theme: jekyll-theme-minimal
+markdown: kramdown
+exclude:
+  - "*.pdf"
