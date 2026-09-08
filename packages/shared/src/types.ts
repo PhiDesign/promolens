@@ -127,6 +127,8 @@ export interface PostInput {
   commentsCount?: number;
   /** Age of the post in hours, if visible. */
   ageHours?: number;
+  /** Size of the community, when known - lets reach be judged relative to it. */
+  subredditSubscribers?: number;
   outboundDomains?: string[];
   /** Full URLs visible in the post (title link + links inside body). */
   links?: string[];

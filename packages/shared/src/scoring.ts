@@ -267,17 +267,35 @@ export function computeReach(post: PostInput): Reach {
   }
   const votes = up ?? 0;
   const perHour = age && age > 0 ? votes / age : undefined;
+  const members = post.subredditSubscribers;
   let level: Reach["level"] = "low";
-  if (votes >= 1000 || (perHour !== undefined && perHour >= 150) || (comments ?? 0) >= 300) level = "high";
-  else if (votes >= 100 || (perHour !== undefined && perHour >= 25) || (comments ?? 0) >= 50) level = "medium";
+  if (members && members >= 1000) {
+    // Relative to the community: 300 upvotes is a big deal in a 20k-member
+    // subreddit and background noise in a 20M one. Per-thousand-members
+    // thresholds, with absolute floors so a small community's "high" is
+    // still a real audience.
+    const perThousand = (votes / members) * 1000;
+    const commentsPerThousand = ((comments ?? 0) / members) * 1000;
+    if ((perThousand >= 2 && votes >= 50) || (commentsPerThousand >= 0.5 && (comments ?? 0) >= 30) || votes >= 5000) level = "high";
+    else if ((perThousand >= 0.4 && votes >= 15) || (commentsPerThousand >= 0.1 && (comments ?? 0) >= 10) || votes >= 500) level = "medium";
+  } else {
+    if (votes >= 1000 || (perHour !== undefined && perHour >= 150) || (comments ?? 0) >= 300) level = "high";
+    else if (votes >= 100 || (perHour !== undefined && perHour >= 25) || (comments ?? 0) >= 50) level = "medium";
+  }
 
   const parts: string[] = [];
   if (typeof up === "number") parts.push(`${up.toLocaleString("en-US")} upvotes`);
   if (typeof comments === "number") parts.push(`${comments.toLocaleString("en-US")} comments`);
   let explanation = parts.join(" and ");
   if (age !== undefined) explanation += ` on a ${formatAge(age)} post`;
+  if (members && members >= 1000) explanation += ` in a ${formatMembers(members)}-member community`;
   explanation += " (approximate; reach is not evidence of promotion)";
   return { level, explanation };
+}
+
+function formatMembers(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(n >= 10_000_000 ? 0 : 1)}M`;
+  return `${Math.round(n / 1000)}k`;
 }
 
 function formatAge(hours: number): string {

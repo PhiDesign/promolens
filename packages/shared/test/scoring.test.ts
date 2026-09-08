@@ -177,6 +177,21 @@ describe("reach stays separate from promotion", () => {
     for (const s of r.signals.filter((x) => x.category === "engagement")) expect(s.weight).toBe(0);
   });
 
+  it("judges reach relative to the community when its size is known", () => {
+    const small = computeReach({ title: "x", upvotes: 320, commentsCount: 70, ageHours: 8, subredditSubscribers: 20_000 });
+    const huge = computeReach({ title: "x", upvotes: 320, commentsCount: 70, ageHours: 8, subredditSubscribers: 20_000_000 });
+    expect(small.level).toBe("high");
+    expect(huge.level).toBe("low");
+    expect(small.explanation).toContain("20k-member community");
+    expect(huge.explanation).toContain("20M-member community");
+    // a tiny community's handful of votes is not "high" reach
+    expect(computeReach({ title: "x", upvotes: 6, commentsCount: 2, subredditSubscribers: 1_500 }).level).toBe("low");
+    // and relative reach never touches the promotional score
+    const a = analyzePost({ title: "PSA", body: "Your library card gives free access to a lot.", upvotes: 320, subredditSubscribers: 20_000 });
+    const b = analyzePost({ title: "PSA", body: "Your library card gives free access to a lot.", upvotes: 320, subredditSubscribers: 20_000_000 });
+    expect(a.promoLikelihood).toBe(b.promoLikelihood);
+  });
+
   it("explains reach with visible numbers", () => {
     const reach = computeReach({ title: "x", upvotes: 2400, commentsCount: 184, ageHours: 3 });
     expect(reach.level).toBe("high");

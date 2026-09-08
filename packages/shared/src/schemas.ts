@@ -86,6 +86,7 @@ export const PostInputSchema = z.object({
   upvotes: z.number().int().min(-1_000_000).max(100_000_000).optional(),
   commentsCount: z.number().int().min(0).max(100_000_000).optional(),
   ageHours: z.number().min(0).max(1_000_000).optional(),
+  subredditSubscribers: z.number().int().min(0).max(1_000_000_000).optional(),
   outboundDomains: z.array(z.string().max(253)).max(MAX_LINKS).optional(),
   links: z.array(z.string().max(2000)).max(MAX_LINKS).optional(),
   brandAffiliateLabel: z.boolean().optional(),

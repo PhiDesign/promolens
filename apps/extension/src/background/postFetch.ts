@@ -96,6 +96,7 @@ function toPost(d: Record<string, unknown>, path: string): PostInput | undefined
     upvotes: num(d.score),
     commentsCount: num(d.num_comments),
     ageHours: created !== undefined ? Math.max(0, (Date.now() / 1000 - created) / 3600) : undefined,
+    subredditSubscribers: num(d.subreddit_subscribers),
     links: [...links].slice(0, MAX_LINKS),
     outboundDomains: [...domains].slice(0, MAX_LINKS),
     brandAffiliateLabel: d.is_created_from_ads_ui === true || /brand affiliate/i.test(String(d.author_flair_text ?? "")) || undefined,
