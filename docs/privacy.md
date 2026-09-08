@@ -1,6 +1,8 @@
-# PromoLens privacy notes (draft)
+# PromoLens privacy policy
 
-This is a draft written for the first local milestone. It will be reviewed again before any public release, before any paid AI provider is enabled, and before any server-side storage is introduced.
+Version 0.2, 8 September 2026. Published at <https://phidesign.github.io/promolens/privacy>. This policy will be updated before any change to what is collected, before any hosted service is introduced, and before any paid option exists.
+
+**In one sentence:** PromoLens reads only the Reddit post you click on (and, if enabled, that author's public posts), analyses it in your browser, and sends nothing anywhere unless you deliberately switch on the optional developer feature that talks to an API you run yourself.
 
 ## Summary
 

@@ -3,6 +3,8 @@
 PromoLens is a desktop Chrome extension that, **when you ask it to**, estimates **how likely an opened Reddit post is to be promotional**, and shows the observable evidence behind that estimate. It helps readers notice transparent promotion ("I built this") and *possible* undisclosed promotion, without ever claiming that an author is definitely a marketer, scammer, or product owner.
 
 > PromoLens is an independent open-source project. It is **not affiliated with, approved by, or endorsed by Reddit**.
+>
+> Docs and privacy policy: <https://phidesign.github.io/promolens/> · Source: <https://github.com/PhiDesign/promolens>
 
 ## What it shows
 
