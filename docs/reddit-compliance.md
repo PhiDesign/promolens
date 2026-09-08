@@ -57,6 +57,15 @@ Consequence: the OAuth migration depends on an approved access request, not just
 - Likely weaknesses of that submission, to fix before resubmitting: (1) the source-code link pointed at a private repository (404 for the reviewer); (2) no registered app / client id was referenced; (3) the description mentioned an optional third-party language-model provider - a reviewer reads that as sharing Reddit data with a third party; (4) "reads the author's recent public posts and comments" can read as user profiling under the "zero tolerance for privacy violations" section unless framed as spam/repeat-promotion detection of the *post's author* only; (5) no public privacy policy URL.
 - Plan: public repo + privacy policy page + registered app first; describe the public build as rules-only in the browser (no third party), with the history check framed precisely; then resubmit. Personal use is unaffected (page-session reads continue).
 - **2026-09-08** - repository made public; docs published at <https://phidesign.github.io/promolens/> (privacy policy at `/privacy`).
+- **2026-09-08 - request #18420929 (second, rewritten) denied** with the identical form text, again within the hour. Two identical fast denials indicate the *category* of request is rejected, not the wording.
+- **Gap analysis against the policy text** (what a browser extension structurally cannot satisfy):
+  1. *"Apps must register and create a developer profile to get an App profile label"* - the process assumes an app that acts as its own Reddit account with a developer profile (Devvit-style). An extension acting as each reader has no app account and no profile; and app registration is itself gated, so this cannot be pre-empted.
+  2. *"Developers should use the Developer Platform (Devvit)"* - non-Devvit approvals are exceptions; a reader-side browser extension is not a category the process recognises.
+  3. *"only accessing the subreddits and API actions they need"* - "any post the reader opens, in any subreddit" reads as unbounded scope.
+  4. *"Zero tolerance ... derive or infer potentially sensitive characteristics about Reddit users"* - reading an author's profile to characterise their posting behaviour is read as user-level inference, however it is framed.
+  5. *"Be transparent ... not misrepresent how you are accessing"* - an extension cannot set a custom User-Agent; its requests look like a browser (the admin's own "pretending to be a human with a browser" concern).
+  6. The new approval model is per new OAuth token; a public extension would create a new token per user, which the process is not built to approve in bulk.
+- **Conclusion:** the Data API route is closed to this product shape for now. The extension itself never needed it: analysing the post page the reader has open uses no Reddit API. Decision: public build = page-only, no fetches, no approval needed; author-history and feed-card fetching remain developer/personal options; the ticket is left with one clarification reply and not pursued further.
 
 ## Context: the November 2025 policy change
 
