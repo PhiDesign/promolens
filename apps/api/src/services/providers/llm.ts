@@ -66,7 +66,14 @@ export const JUDGMENT_CATEGORIES: ReadonlySet<SignalCategory> = new Set<SignalCa
   "counter-signal",
   "account",
   "repetition",
+  "community-evidence",
+  "comment-behavior",
 ]);
+
+/** Claims about the thread may quote the visible comments. */
+const COMMENT_QUOTE_CATEGORIES: ReadonlySet<SignalCategory> = new Set<SignalCategory>(["community-evidence", "comment-behavior", "counter-signal"]);
+const MAX_PROMPT_COMMENTS = 20;
+const MAX_COMMENT_PROMPT_CHARS = 300;
 
 /** Rule signals the model may retract: text judgments only, never mechanical facts. */
 export const RETRACTABLE_CATEGORIES: ReadonlySet<SignalCategory> = new Set<SignalCategory>([
@@ -143,21 +150,27 @@ export class LlmWitnessProvider implements AnalysisProvider {
       `llm ${this.name}: ${output.signals.length} claims, ${output.retract.length} retractions, ${output.observations.length} observations (${Date.now() - started} ms)`,
     );
 
-    const merged = this.merge(post.title, post.body ?? "", ruleSignals, output, historyQuoteHaystack(post.authorHistory));
+    const commentsText = (post.visibleComments ?? []).map((c) => c.text).join("\n");
+    const merged = this.merge(post.title, post.body ?? "", ruleSignals, output, historyQuoteHaystack(post.authorHistory), commentsText);
     return scoreSignals(merged, post, "api");
   }
 
   /** Apply verified model claims, observations and permitted retractions to the rule signals. */
-  merge(title: string, body: string, ruleSignals: Signal[], output: ModelOutput, historyText = ""): Signal[] {
+  merge(title: string, body: string, ruleSignals: Signal[], output: ModelOutput, historyText = "", commentsText = ""): Signal[] {
     // Quotes for claims about *this post* (calls to action, narrative,
-    // disclosure...) must come from the post. Only account/repetition claims
-    // may quote the author's history - otherwise "I'm the founder" said in
-    // another post would count as a disclosure here, which is exactly the
-    // undisclosed case we must not miss.
+    // disclosure...) must come from the post. Account/repetition claims may
+    // quote the author's history; thread claims may quote the comments.
+    // Otherwise "I'm the founder" said in another post, or a commenter's
+    // words, would count as a disclosure here - exactly the undisclosed case
+    // we must not miss.
     const postHaystack = normalizeForMatch(`${title}\n${body}`);
     const historyHaystack = historyText ? normalizeForMatch(historyText) : "";
-    const haystackFor = (category: SignalCategory) =>
-      HISTORY_QUOTE_CATEGORIES.has(category) ? `${postHaystack}\n${historyHaystack}` : postHaystack;
+    const commentsHaystack = commentsText ? normalizeForMatch(commentsText) : "";
+    const haystackFor = (category: SignalCategory) => {
+      if (HISTORY_QUOTE_CATEGORIES.has(category)) return `${postHaystack}\n${historyHaystack}`;
+      if (COMMENT_QUOTE_CATEGORIES.has(category)) return `${postHaystack}\n${commentsHaystack}`;
+      return postHaystack;
+    };
     const minConfidence = this.options.minConfidence ?? 0.6;
 
     const retracted = new Set<string>();
@@ -201,7 +214,7 @@ export class LlmWitnessProvider implements AnalysisProvider {
     for (const obs of output.observations) {
       if (observations >= MAX_OBSERVATIONS) break;
       if (obs.confidence < minConfidence) continue;
-      if (!`${postHaystack}\n${historyHaystack}`.includes(normalizeForMatch(obs.quote))) {
+      if (!`${postHaystack}\n${historyHaystack}\n${commentsHaystack}`.includes(normalizeForMatch(obs.quote))) {
         rejected++;
         continue;
       }
@@ -277,6 +290,7 @@ function buildSystemPrompt(criteria: Criterion[]): string {
     "4. Counter-signals matter: honest limitations, balanced comparisons, useful advice with nothing to buy.",
     "5. If a rule signal listed under `ruleSignals` is a false positive, add its id to `retract` with a short reason. Only retract when you are confident.",
     "6. When an `author history` section is present, it lists the author's other recent public posts and comments. You may cite account/repetition criteria from it - quoting a history title or excerpt verbatim - for example the same product posted across several communities, or the author calling it their own elsewhere. Never use history text for disclosure claims: a disclosure only counts if it is in THIS post. Do not speculate beyond what is listed.",
+    "6b. When a `visible comments` section is present, you may cite community-evidence and comment-behavior criteria from it, quoting a comment verbatim: independent commenters raising concerns, a commenter linking evidence, the author admitting a connection or dodging affiliation questions, the author steering people to DMs, or the author answering openly without pushing (a counter-signal). Lines marked [OP] are the post author. Judge whether concerns are independent or a pile-on; a single 'this is an ad' is weak. A commenter's claim is never a disclosure by the author.",
     "7. Do not label anyone a scammer, liar, shill, or marketer. Notes must be neutral observations.",
     "8. When unsure, omit the claim. Fewer, well-supported claims beat many weak ones.",
     "9. `observations` is your own channel for anything promotional or organic that the catalogue does not name (an unusual pattern, a tell, a sign of genuineness). Each needs a verbatim quote, a direction, a short neutral note and a confidence. They count a little, never a lot.",
@@ -287,6 +301,18 @@ function buildSystemPrompt(criteria: Criterion[]): string {
     "Criteria catalogue:",
     catalogue,
   ].join("\n");
+}
+
+/** Top comments, compact, with the post author marked. */
+function summarizeComments(comments: NonNullable<AnalyzeRequest["post"]["visibleComments"]>): string {
+  if (!comments.length) return "visible comments: none";
+  const lines = comments.slice(0, MAX_PROMPT_COMMENTS).map((c) => {
+    const who = c.isOp ? "[OP]" : `u/${c.author ?? "someone"}`;
+    const indent = c.depth ? "  ".repeat(Math.min(c.depth, 3)) : "";
+    return `${indent}- ${who}: ${c.text.replace(/\s+/g, " ").slice(0, MAX_COMMENT_PROMPT_CHARS)}`;
+  });
+  const more = comments.length > MAX_PROMPT_COMMENTS ? `\n(${comments.length - MAX_PROMPT_COMMENTS} more not shown)` : "";
+  return `visible comments (${comments.length}):\n${lines.join("\n")}${more}`;
 }
 
 function buildUserPrompt(post: AnalyzeRequest["post"], ruleSignals: Signal[], maxBodyChars: number): string {
@@ -306,6 +332,8 @@ function buildUserPrompt(post: AnalyzeRequest["post"], ruleSignals: Signal[], ma
     links.length ? `visible links:\n${links.map((l) => `- ${l}`).join("\n")}` : "visible links: none",
     "",
     summarizeHistory(post.authorHistory, 15), // keep the prompt small: slow models time out on long ones
+    "",
+    summarizeComments(post.visibleComments ?? []),
     "",
     "ruleSignals (already detected by pattern rules; retract any that are false positives):",
     rules || "- none",

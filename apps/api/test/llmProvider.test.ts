@@ -178,6 +178,39 @@ describe("LlmWitnessProvider", () => {
     expect(ids).not.toContain("account.repeats-domain");
   });
 
+  it("thread claims may quote the comments; a commenter's words never count as the author's disclosure", async () => {
+    const withComments: AnalyzeRequest = {
+      post: {
+        title: "Just hit 11.9k downloads - the 5 strategies that worked",
+        body: "4. I have now fully automated it with my own tool called DistributionMaxx.",
+        author: "john200ok",
+        isDetailPage: true,
+        visibleComments: [
+          { author: "a", text: "Hmm is this just to sell DistributionMaxx?" },
+          { author: "b", text: "OP is the founder of DistributionMaxx, look at his profile" },
+          { author: "john200ok", text: "Sure. Send a dm or post it here", isOp: true, depth: 1 },
+        ],
+      },
+      localSignals: [],
+    };
+    const provider = new LlmWitnessProvider(
+      fakeClient(
+        JSON.stringify({
+          signals: [
+            { id: "community.avoids-affiliation-questions", quote: "Send a dm or post it here", confidence: 0.9 },
+            { id: "disclosure.employment", quote: "OP is the founder of DistributionMaxx", confidence: 0.95 }, // commenter's words
+            { id: "cta.dm-request", quote: "Send a dm or post it here", confidence: 0.9 }, // post-level claim, comment quote
+          ],
+        }),
+      ),
+    );
+    const result = await provider.analyze(withComments, ctrl());
+    const ids = result.signals.map((s) => s.id);
+    expect(ids).toContain("community.avoids-affiliation-questions");
+    expect(ids).not.toContain("disclosure.employment");
+    expect(ids).not.toContain("cta.dm-request");
+  });
+
   it("a disclosure quoted from the author's history does not count as a disclosure in this post", async () => {
     const undisclosed: AnalyzeRequest = {
       post: {

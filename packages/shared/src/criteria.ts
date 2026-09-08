@@ -299,7 +299,7 @@ export const CRITERIA: readonly Criterion[] = [
     affects: [P, D], evidenceSource: "comments", requiresVerification: false, availability: "page", correlationGroup: "self-connection" },
   { id: "community.avoids-affiliation-questions", category: "community-evidence", strength: "medium", weight: 10,
     description: "The author avoids multiple public affiliation questions",
-    affects: [P, D], evidenceSource: "comments", requiresVerification: true, availability: "unavailable" },
+    affects: [P, D], evidenceSource: "comments", requiresVerification: false, availability: "page" },
   { id: "community.links-changed", category: "community-evidence", strength: "medium", weight: 15,
     description: "The author deletes or changes promotional links after being questioned",
     affects: [P], evidenceSource: "comments", requiresVerification: true, availability: "unavailable" },

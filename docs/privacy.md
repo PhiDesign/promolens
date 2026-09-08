@@ -48,7 +48,7 @@ The extension requests the `storage` permission and host access to `https://www.
 
 When the local API is started with `ANALYSIS_PROVIDER=openai`, each analysed post is also sent from **your local API server** to the configured model endpoint (by default OpenAI's). This only happens if you (1) run the API yourself, (2) put a key in `apps/api/.env`, (3) switch on **Deeper analysis** in the extension popup, and (4) click the button on a post.
 
-What is sent to the model: the subreddit name, the post title, up to 6,000 characters of the visible post body, up to ten visible links, the list of rule signals already detected, and - when the history check is on - the compact author-history summary (titles, subreddits, domains, short excerpts, dates of the author's recent public posts and comments). No votes, no browsing history, nothing about you. (Visible comments are used by the rule engine in the browser and on the API; they are not yet forwarded to the model.)
+What is sent to the model: the subreddit name, the post title, up to 6,000 characters of the visible post body, up to ten visible links, the list of rule signals already detected, and - when the history check is on - the compact author-history summary (titles, subreddits, domains, short excerpts, dates of the author's recent public posts and comments). No votes, no browsing history, nothing about you. Up to 20 visible top-level comments (300 characters each, with the post author's replies marked) are included so the model can weigh what the thread says.
 
 What comes back: criterion IDs with short verbatim quotes. The model never returns a score; the rule engine computes it. Quotes that do not appear in the post are discarded, so the model cannot invent evidence.
 
