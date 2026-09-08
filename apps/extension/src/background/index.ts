@@ -26,7 +26,10 @@ import { fetchAuthorHistory, HistoryCache, type FetchLike } from "./history.js";
 import { fetchPostPage, normalizePermalink } from "./postFetch.js";
 import { dataApiFetch, RedditAuth } from "./redditAuth.js";
 
-const rawFetch: FetchLike = (url, init) => fetch(url, init);
+// Every Reddit request gets its own deadline so a slow listing answers with
+// "unavailable" instead of leaving the content script waiting on the worker.
+const REDDIT_REQUEST_TIMEOUT_MS = 10_000;
+const rawFetch: FetchLike = (url, init) => fetch(url, { ...init, signal: init?.signal ?? AbortSignal.timeout(REDDIT_REQUEST_TIMEOUT_MS) });
 
 /** Official Data API login. Dormant until REDDIT_CLIENT_ID is set (see shared/redditApp.ts). */
 const redditAuth = new RedditAuth(chromeLocalStore(), {

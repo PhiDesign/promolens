@@ -226,6 +226,10 @@ function describeReason(reason: string | undefined): string {
       return "profile not found";
     case "rate_limited":
       return "Reddit rate limit reached; try again later";
+    case "timeout":
+      return "Reddit did not answer in time";
+    case "fetch_failed":
+      return "Reddit could not be reached";
     case "no_author":
       return "no author name visible";
     case "disabled":

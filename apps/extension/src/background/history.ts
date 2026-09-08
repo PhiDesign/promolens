@@ -45,11 +45,18 @@ export async function fetchAuthorHistory(author: string, fetchFn: FetchLike, now
     return { status: res.status, body };
   };
 
-  const [about, submitted, comments] = await Promise.all([
-    get("about.json?raw_json=1"),
-    get(`submitted.json?limit=${LIMIT}&raw_json=1`),
-    get(`comments.json?limit=${LIMIT}&raw_json=1`),
-  ]);
+  let about: { status: number; body: unknown }, submitted: { status: number; body: unknown }, comments: { status: number; body: unknown };
+  try {
+    [about, submitted, comments] = await Promise.all([
+      get("about.json?raw_json=1"),
+      get(`submitted.json?limit=${LIMIT}&raw_json=1`),
+      get(`comments.json?limit=${LIMIT}&raw_json=1`),
+    ]);
+  } catch (err) {
+    // Network failure or per-request timeout: report it rather than throwing,
+    // so the analysis continues with lower confidence.
+    return { ...base, reason: err instanceof Error && /abort|timeout/i.test(err.name + err.message) ? "timeout" : "fetch_failed" };
+  }
 
   const worst = Math.max(about.status, submitted.status, comments.status);
   if (worst === 429) return { ...base, reason: "rate_limited" };

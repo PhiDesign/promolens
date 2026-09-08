@@ -11,8 +11,8 @@ import { debug, warn } from "./debug.js";
 const DEFAULT_TIMEOUT_MS = 1_500;
 const TIMEOUTS: Partial<Record<Message["type"], number>> = {
   ENRICH: 60_000, // API client itself times out at 55 s; leave headroom
-  HISTORY_GET: 12_000, // three Reddit listing requests
-  POST_GET: 12_000, // one Reddit listing request
+  HISTORY_GET: 20_000, // three Reddit listing requests, each capped at 10 s in the worker
+  POST_GET: 20_000, // one Reddit listing request, capped at 10 s in the worker
 };
 
 export async function send<T>(message: Message): Promise<T | undefined> {
