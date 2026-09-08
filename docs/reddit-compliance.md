@@ -56,6 +56,23 @@ Consequence: the OAuth migration depends on an approved access request, not just
 - **2026-09-07 - denied** the same day, form reply: "not in compliance with Reddit's Responsible Builder Policy and/or lacks necessary details." No specifics given.
 - Likely weaknesses of that submission, to fix before resubmitting: (1) the source-code link pointed at a private repository (404 for the reviewer); (2) no registered app / client id was referenced; (3) the description mentioned an optional third-party language-model provider - a reviewer reads that as sharing Reddit data with a third party; (4) "reads the author's recent public posts and comments" can read as user profiling under the "zero tolerance for privacy violations" section unless framed as spam/repeat-promotion detection of the *post's author* only; (5) no public privacy policy URL.
 - Plan: public repo + privacy policy page + registered app first; describe the public build as rules-only in the browser (no third party), with the history check framed precisely; then resubmit. Personal use is unaffected (page-session reads continue).
+- **2026-09-08** - repository made public; docs published at <https://phidesign.github.io/promolens/> (privacy policy at `/privacy`).
+
+## Resubmission text (second request)
+
+Fill in the app name / client id before sending. Keep every sentence true of the public build.
+
+> **Benefit for Redditors.** PromoLens helps readers tell transparent promotion from possible undisclosed promotion. Many posts in communities such as r/SaaS or r/Entrepreneur are product pitches dressed as stories or advice. On the reader's request, PromoLens shows an estimate of how promotional a post is, whether the author disclosed a connection, and the observable evidence, quoted from the post. It treats an openly disclosed founder post as fine and never makes claims about a person - only about a post. Free, open source (MIT): https://github.com/PhiDesign/promolens. Privacy policy: https://phidesign.github.io/promolens/privacy.
+>
+> **What the app does on Reddit.** It is a Chrome extension that runs entirely in the reader's browser. It never posts, votes, comments, or messages, and does nothing automatically. When the reader clicks a button on a post, it reads that one post (title, body, links, top-level comments) and the post author's recent public submissions and comments - the same pages anyone can open - through the Data API with the reader's own OAuth login (read-only scopes: identity, read, history). A rule engine in the browser then scores the post. The author history is used for one purpose: to see whether the same product is being posted repeatedly across communities (repeat promotion / spam). PromoLens does not infer anything about people - no sensitive characteristics, no identity matching, no profiling beyond "this product recurs in this author's posts". Results are shown as estimates (e.g. "possible undisclosed promotion", "transparent promotion") with quoted evidence and links back to the source posts. Nothing is stored on any server; results are cached in the browser for 24 hours by content hash and can be cleared with one click; post text is never written to disk. No data is sold, shared, or used to train any model. Volume: about four API requests per click, a few dozen per user per day.
+>
+> **Example.** A post titled "My exact content workflow" that names five tools and links only one, with a referral code, by an author whose public posts mention that tool in five communities, is shown as "Possible undisclosed promotion" with those three facts as reasons. A post saying "I'm the founder, here is the link" is shown as "Transparent promotion". A balanced comparison with no links is shown as "Looks organic".
+>
+> **Why not Devvit.** PromoLens must annotate any post the reader is viewing, in the reader's own browser, on the reader's request, without moderator installation and without acting as its own account. Devvit apps are installed per subreddit by moderators and render inside Reddit's app surfaces; they cannot add a control to arbitrary post pages in the reader's browser.
+>
+> **Subreddits.** None specifically - it acts only on the post the reader clicks. **Operating username.** None; it acts as the logged-in reader. **App.** [name / client id].
+
+Do not mention the optional language-model API in this request: it is a developer-only feature, off by default, that runs against a server the developer hosts; it is not part of the public build's Reddit data flow.
 
 ## Why the design already helps
 
