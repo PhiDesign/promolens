@@ -5,7 +5,7 @@
   "description": "Click a Reddit post to see how promotional it is, whether the author disclosed it, and the evidence. Not affiliated with Reddit.",
   "minimum_chrome_version": "116",
   "permissions": ["storage"],
-  "host_permissions": ["https://www.reddit.com/*"],
+  "host_permissions": ["https://www.reddit.com/*", "https://promolens.onrender.com/*"],
   "optional_host_permissions": ["https://api.openai.com/*"],
   "background": {
     "service_worker": "background.js"
