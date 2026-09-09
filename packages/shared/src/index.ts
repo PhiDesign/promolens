@@ -7,6 +7,8 @@ export * from "./hash.js";
 export * from "./history.js";
 export * from "./verdict.js";
 export * from "./schemas.js";
+export * from "./witness.js";
+export * from "./openaiClient.js";
 export * from "./limits.js";
 export {
   normalizeWhitespace,

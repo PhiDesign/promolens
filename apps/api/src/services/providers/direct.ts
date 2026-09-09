@@ -25,8 +25,7 @@ import {
   type Criterion,
   type Signal,
 } from "@promolens/shared";
-import { summarizeHistory } from "@promolens/shared";
-import { normalizeForMatch, type ChatClient } from "./llm.js";
+import { normalizeForMatch, summarizeHistory, type ChatClient } from "@promolens/shared";
 import type { AnalysisProvider } from "./types.js";
 
 

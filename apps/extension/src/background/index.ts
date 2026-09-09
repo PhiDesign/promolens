@@ -24,6 +24,7 @@ import { ApiClient, ApiError } from "./apiClient.js";
 import { chromeLocalStore, memoryStore, ResultCache } from "./cache.js";
 import { fetchAuthorHistory, HistoryCache, type FetchLike } from "./history.js";
 import { fetchPostPage, normalizePermalink } from "./postFetch.js";
+import { analyzeWithOwnKey, ownKeyReady, testOwnKey } from "./ownKey.js";
 import { dataApiFetch, RedditAuth } from "./redditAuth.js";
 
 // Every Reddit request gets its own deadline so a slow listing answers with
@@ -72,6 +73,16 @@ const historyInFlight = new Map<string, Promise<HistoryResponse>>();
 // API's own LLM_TIMEOUT_MS so the server's answer (or 502) arrives first.
 const API_TIMEOUT_MS = 55_000;
 const api = new ApiClient(API_TIMEOUT_MS, 2);
+
+/** Map a model-call error to the short reasons the content script already understands. */
+function classifyModelError(message: string): string {
+  if (/timed out/i.test(message)) return "timeout";
+  if (/401/.test(message)) return "bad_key";
+  if (/429|insufficient_quota|rate_limit/.test(message)) return "http_429";
+  if (/HTTP (\d{3})/.test(message)) return `http_${/HTTP (\d{3})/.exec(message)?.[1]}`;
+  if (/JSON|shape/.test(message)) return "invalid_response";
+  return "unreachable";
+}
 
 async function ttlMs(): Promise<number> {
   const settings = await loadSettings();
@@ -171,16 +182,31 @@ async function handle(message: Message): Promise<unknown> {
       // while the request is in flight (standard MV3 keep-alive).
       const keepAlive = setInterval(() => void chrome.runtime.getPlatformInfo(() => undefined), 20_000);
       try {
-        const result = await api.analyze(settings.apiBaseUrl, message.post, message.localSignals, message.hash);
+        let result;
+        if (settings.aiProvider === "own-key") {
+          if (!ownKeyReady(settings)) {
+            const response: EnrichResponse = { ok: false, reason: "no_key" };
+            return response;
+          }
+          result = await analyzeWithOwnKey(message.post, message.localSignals, settings);
+        } else {
+          result = await api.analyze(settings.apiBaseUrl, message.post, message.localSignals, message.hash);
+        }
         await cache.put(message.hash, result, await ttlMs());
         const response: EnrichResponse = { ok: true, result };
         return response;
       } catch (err) {
-        const response: EnrichResponse = { ok: false, reason: err instanceof ApiError ? err.reason : "unknown" };
+        const reason = err instanceof ApiError ? err.reason : err instanceof Error ? classifyModelError(err.message) : "unknown";
+        const response: EnrichResponse = { ok: false, reason };
         return response;
       } finally {
         clearInterval(keepAlive);
       }
+    }
+    case "AI_TEST": {
+      const settings = await loadSettings();
+      const response: SimpleResponse = await testOwnKey(settings);
+      return response;
     }
     case "API_HEALTH": {
       const settings = await loadSettings();

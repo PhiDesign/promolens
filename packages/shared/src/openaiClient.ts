@@ -6,7 +6,7 @@
  * The key comes from server config and is only ever put in the Authorization
  * header of this request.
  */
-import type { ChatClient } from "./llm.js";
+import type { ChatClient } from "./witness.js";
 
 export interface OpenAiClientOptions {
   apiKey: string;

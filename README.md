@@ -136,9 +136,11 @@ promolens/
 
 See [docs/architecture.md](docs/architecture.md) for details and the exact rules.
 
-### Optional: use a language model for deeper analysis
+### Optional: deeper analysis with a language model
 
-The API ships with a deterministic `mock` provider. To let a model act as an evidence witness (it quotes evidence; the rule engine still computes the score - see `docs/architecture.md`):
+The simplest way, no server needed: open the popup, switch on **Deeper analysis**, choose **Use my own OpenAI API key**, paste a key from platform.openai.com/api-keys and click **Save and test key**. Chrome asks once for permission to contact api.openai.com. From then on each click also sends that post to the model, which adds quoted evidence; the rule engine still computes the score. Cost is billed to your OpenAI account - roughly half a cent per post with `gpt-5-mini`.
+
+Developers who want to run the model behind their own API (for the evaluation harness, other providers, or a shared server) can use the local API instead:
 
 1. Copy `.env.example` to `apps/api/.env` if it does not exist.
 2. In `apps/api/.env` set:

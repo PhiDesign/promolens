@@ -15,11 +15,9 @@
 import { readdirSync, readFileSync, mkdirSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { analyzePost, type AnalysisResult, type AnalyzeRequest } from "@promolens/shared";
+import { analyzePost, LlmWitnessProvider, OpenAiChatClient, type AnalysisResult, type AnalyzeRequest } from "@promolens/shared";
 import { loadConfig } from "../src/config.js";
 import { DirectLlmProvider } from "../src/services/providers/direct.js";
-import { LlmWitnessProvider } from "../src/services/providers/llm.js";
-import { OpenAiChatClient } from "../src/services/providers/openai.js";
 import type { AnalysisProvider } from "../src/services/providers/types.js";
 import { mean, renderTable, summarize, type EvalCase, type RunResult } from "./metrics.js";
 

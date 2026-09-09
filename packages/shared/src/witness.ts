@@ -22,20 +22,22 @@
  * Transport is injected (`ChatClient`) so tests run without any network.
  */
 import { z } from "zod";
-import {
-  detectAll,
-  historyQuoteHaystack,
-  listCriteria,
-  makeSignal,
-  scoreSignals,
-  summarizeHistory,
-  type AnalysisResult,
-  type AnalyzeRequest,
-  type Criterion,
-  type Signal,
-  type SignalCategory,
-} from "@promolens/shared";
-import type { AnalysisProvider } from "./types.js";
+import { listCriteria } from "./criteria.js";
+import { detectAll, makeSignal } from "./detectors.js";
+import { historyQuoteHaystack, summarizeHistory } from "./history.js";
+import type { AnalyzeRequest } from "./schemas.js";
+import { scoreSignals } from "./scoring.js";
+import type { AnalysisResult, Criterion, Signal, SignalCategory } from "./types.js";
+
+/**
+ * Anything that turns a validated request into an AnalysisResult: the mock
+ * provider on the API, the witness below, the experimental direct provider.
+ * Lives here so the extension's background worker can use the same contract.
+ */
+export interface AnalysisProvider {
+  readonly name: string;
+  analyze(request: AnalyzeRequest, signal: AbortSignal): Promise<AnalysisResult>;
+}
 
 /** Minimal chat transport: returns the model's raw text for one exchange. */
 export interface ChatClient {

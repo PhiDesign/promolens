@@ -1,13 +1,6 @@
-import type { AnalysisResult, AnalyzeRequest } from "@promolens/shared";
-
 /**
- * An analysis provider turns a validated request into an AnalysisResult.
- *
- * The mock provider is deterministic and needs no secrets. A real AI provider
- * would implement this same interface, read its key from the server-side
- * config, and must still return signals with observable explanations.
+ * The provider contract lives in the shared package (packages/shared/src/witness.ts)
+ * so the extension can run the same providers without a server. Re-exported
+ * here to keep API imports short.
  */
-export interface AnalysisProvider {
-  readonly name: string;
-  analyze(request: AnalyzeRequest, signal: AbortSignal): Promise<AnalysisResult>;
-}
+export type { AnalysisProvider } from "@promolens/shared";

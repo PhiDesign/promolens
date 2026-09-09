@@ -1,11 +1,19 @@
 /**
  * User settings, stored in chrome.storage.local under one key.
  */
+export type AiProvider = "own-key" | "local-api";
+
 export interface Settings {
   /** Show the PromoLens button on post pages. */
   enabled: boolean;
-  /** On click, also send the post to the optional local API (language-model witness). Off by default. */
+  /** Deeper analysis with a language model (any provider). Off by default. */
   apiEnabled: boolean;
+  /** Where the model runs: the user's own OpenAI key from the worker, or a local API server (developers). */
+  aiProvider: AiProvider;
+  /** Own-key mode: stored only in this extension's storage on this device; sent only to the provider. */
+  ownKey: string;
+  ownModel: string;
+  /** Local-API mode. */
   apiBaseUrl: string;
   /** Cached results older than this are ignored. */
   cacheTtlHours: number;
@@ -17,9 +25,14 @@ export interface Settings {
   dataApiEnabled: boolean;
 }
 
+export const OWN_KEY_MODELS = ["gpt-5-mini", "gpt-5", "gpt-4.1-mini", "gpt-4.1"] as const;
+
 export const DEFAULT_SETTINGS: Settings = {
   enabled: true,
   apiEnabled: false,
+  aiProvider: "own-key",
+  ownKey: "",
+  ownModel: "gpt-5-mini",
   apiBaseUrl: "http://127.0.0.1:8787",
   cacheTtlHours: 24,
   historyEnabled: true,
@@ -33,9 +46,14 @@ function sanitize(raw: unknown): Settings {
   const r = (raw && typeof raw === "object" ? raw : {}) as Partial<Record<keyof Settings, unknown>>;
   const url = typeof r.apiBaseUrl === "string" && /^https?:\/\//.test(r.apiBaseUrl) ? r.apiBaseUrl.replace(/\/+$/, "") : DEFAULT_SETTINGS.apiBaseUrl;
   const ttl = typeof r.cacheTtlHours === "number" && r.cacheTtlHours > 0 && r.cacheTtlHours <= 24 * 30 ? r.cacheTtlHours : DEFAULT_SETTINGS.cacheTtlHours;
+  const ownKey = typeof r.ownKey === "string" ? r.ownKey.trim().slice(0, 300) : "";
+  const ownModel = typeof r.ownModel === "string" && /^[A-Za-z0-9._-]{2,64}$/.test(r.ownModel.trim()) ? r.ownModel.trim() : DEFAULT_SETTINGS.ownModel;
   return {
     enabled: typeof r.enabled === "boolean" ? r.enabled : DEFAULT_SETTINGS.enabled,
     apiEnabled: typeof r.apiEnabled === "boolean" ? r.apiEnabled : DEFAULT_SETTINGS.apiEnabled,
+    aiProvider: r.aiProvider === "local-api" ? "local-api" : "own-key",
+    ownKey,
+    ownModel,
     apiBaseUrl: url,
     cacheTtlHours: ttl,
     historyEnabled: typeof r.historyEnabled === "boolean" ? r.historyEnabled : DEFAULT_SETTINGS.historyEnabled,

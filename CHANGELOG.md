@@ -2,6 +2,15 @@
 
 All notable changes to PromoLens. Dates are when the version was tagged.
 
+## Unreleased (0.4.0)
+
+### Added
+- Bring your own key: paste an OpenAI API key in the popup and deeper analysis runs from the extension itself - no server. Optional permission for api.openai.com requested on save; key stored on-device only.
+- "Save and test key" with plain-language diagnostics (rejected key, unknown model, no quota).
+
+### Changed
+- The language-model witness and the OpenAI client moved into the shared package so the extension, the API and the evaluation harness run the same code.
+
 ## 0.3.0 - 2026-09-09
 
 First version prepared for the Chrome Web Store.

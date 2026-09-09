@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { AnalysisResultSchema, analyzePost, type AnalyzeRequest } from "@promolens/shared";
 import { rangeError, renderTable, summarize, type EvalCase, type RunResult } from "../eval/metrics.js";
 import { DirectLlmProvider, parseDirectOutput } from "../src/services/providers/direct.js";
-import type { ChatClient } from "../src/services/providers/llm.js";
+import type { ChatClient } from "@promolens/shared";
 
 const cases: EvalCase[] = [
   { id: "a", description: "", post: { title: "a" }, expected: { min: 0, max: 19, disclosure: "unknown" } },

@@ -44,7 +44,13 @@ The extension requests the `storage` permission and host access to `https://www.
 
 **Deeper analysis on:** when you click the button, the background worker sends the fields listed above for that one post, plus the locally detected signals and a content hash, to the configured API URL over HTTP. The bundled API is designed to run on your own machine. If you point it at another machine, the same data goes there - only do that with a server you control and trust.
 
-## Optional AI provider (off by default)
+## Optional deeper analysis with your own API key (off by default)
+
+If you switch on **Deeper analysis** and choose **Use my own OpenAI API key**, the extension itself sends the post you clicked (title, body, up to 20 visible comments, the author-history summary and the rule signals) to `api.openai.com` using your key, and receives quoted evidence back. Chrome asks you once for permission to contact that address; nothing is sent before you save a key.
+
+Your key is stored in this extension's storage on your device, is never sent anywhere except in the request to OpenAI, and can be removed by clearing the field or removing the extension. Usage is billed to your OpenAI account. OpenAI's own policies apply to what they receive; by default OpenAI does not train on API traffic. PromoLens has no server in this path and sees nothing.
+
+## Optional AI provider via a local API server (developers)
 
 When the local API is started with `ANALYSIS_PROVIDER=openai`, each analysed post is also sent from **your local API server** to the configured model endpoint (by default OpenAI's). This only happens if you (1) run the API yourself, (2) put a key in `apps/api/.env`, (3) switch on **Deeper analysis** in the extension popup, and (4) click the button on a post.
 

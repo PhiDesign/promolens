@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { AnalysisResultSchema, type AnalyzeRequest } from "@promolens/shared";
-import { LlmWitnessProvider, parseModelOutput, type ChatClient } from "../src/services/providers/llm.js";
-import { OpenAiChatClient } from "../src/services/providers/openai.js";
+import { AnalysisResultSchema, LlmWitnessProvider, OpenAiChatClient, parseModelOutput, type AnalyzeRequest, type ChatClient } from "@promolens/shared";
 
 function fakeClient(reply: string | (() => string)): ChatClient {
   return {

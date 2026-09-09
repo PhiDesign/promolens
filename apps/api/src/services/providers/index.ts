@@ -1,8 +1,7 @@
 import type { ApiConfig } from "../../config.js";
+import { LlmWitnessProvider, OpenAiChatClient } from "@promolens/shared";
 import { DirectLlmProvider } from "./direct.js";
-import { LlmWitnessProvider } from "./llm.js";
 import { MockProvider } from "./mock.js";
-import { OpenAiChatClient } from "./openai.js";
 import type { AnalysisProvider } from "./types.js";
 
 /**

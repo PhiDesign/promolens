@@ -10,6 +10,8 @@ export type Message =
   | { type: "CACHE_CLEAR" }
   | { type: "ENRICH"; hash: string; post: PostInput; localSignals: Signal[] }
   | { type: "API_HEALTH"; baseUrl?: string }
+  /** Own-key mode: send one tiny completion to check the key and model. */
+  | { type: "AI_TEST" }
   /** Public posting history of one author, fetched on the user's click. */
   | { type: "HISTORY_GET"; author: string }
   /** Full content of one post (body, links, top comments), fetched on the user's click on a feed card. */

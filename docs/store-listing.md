@@ -35,7 +35,7 @@ Optionally, PromoLens also reads the author's recent public posts and comments (
 
 What it is not: PromoLens never labels people, never reports or hides anything, and never acts on your account. Every result is an estimate based on observable signals and can be wrong. Transparent promotion is treated as fine.
 
-Privacy: analysis runs in your browser. Results are cached on your device for 24 hours and can be cleared with one click. No accounts, no analytics, no data sold, no model training. An optional "deeper analysis" mode can send a post to an analysis server you run yourself; it is off by default. Full policy: https://phidesign.github.io/promolens/privacy
+Privacy: analysis runs in your browser. Results are cached on your device for 24 hours and can be cleared with one click. No accounts, no analytics, no data sold, no model training. An optional "deeper analysis" mode sends the post you clicked to a language model using your own OpenAI API key (or to a server you run yourself); it is off by default and asks for permission first. Full policy: https://phidesign.github.io/promolens/privacy
 
 Open source (MIT): https://github.com/PhiDesign/promolens
 
@@ -70,6 +70,10 @@ Estimate, on the user's request, whether the Reddit post they are looking at is 
 - Host permission `https://www.reddit.com/*`:
   ```
   The extension runs only on reddit.com: it reads the post the user opened and inserts the PromoLens button and evidence card. When the user clicks the button, it may also read the author's public profile pages and, for feed cards, that post's page, using the user's own session. Nothing is read without a click.
+  ```
+- Optional host permission `https://api.openai.com/*` (requested at runtime, only if the user saves their own key):
+  ```
+  Used only when the user chooses "Use my own OpenAI API key" in the popup: the extension sends the post the user clicked to OpenAI with the user's own key to obtain quoted evidence. Requested at that moment, never at install.
   ```
 - Remote code: **No**. All code is packaged; no scripts are fetched at runtime.
 

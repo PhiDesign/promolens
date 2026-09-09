@@ -57,6 +57,61 @@ async function init(): Promise<void> {
     apiStatus.textContent = res?.message ?? "Could not reach the background worker";
   });
 
+  // Deeper analysis: provider choice, own key, and a "save and test" that asks
+  // for the api.openai.com permission in the same click (a user gesture).
+  const aiOptions = $<HTMLElement>("aiOptions");
+  const providerOwnKey = $<HTMLInputElement>("providerOwnKey");
+  const providerLocalApi = $<HTMLInputElement>("providerLocalApi");
+  const ownKeyFields = $<HTMLElement>("ownKeyFields");
+  const localApiFields = $<HTMLElement>("localApiFields");
+  const ownKey = $<HTMLInputElement>("ownKey");
+  const ownModel = $<HTMLSelectElement>("ownModel");
+  const saveOwnKey = $<HTMLButtonElement>("saveOwnKey");
+  const OPENAI_ORIGIN = "https://api.openai.com/*";
+
+  const renderAi = (s: { apiEnabled: boolean; aiProvider: string; ownKey: string; ownModel: string }) => {
+    aiOptions.hidden = !s.apiEnabled;
+    providerOwnKey.checked = s.aiProvider === "own-key";
+    providerLocalApi.checked = s.aiProvider === "local-api";
+    ownKeyFields.hidden = s.aiProvider !== "own-key";
+    localApiFields.hidden = s.aiProvider !== "local-api";
+    ownModel.value = s.ownModel;
+    if (s.ownKey && !ownKey.value) ownKey.placeholder = `saved key ending …${s.ownKey.slice(-4)}`;
+  };
+  renderAi(settings);
+  apiEnabled.addEventListener("change", () => renderAi({ ...settings, apiEnabled: apiEnabled.checked, aiProvider: providerOwnKey.checked ? "own-key" : "local-api" }));
+  for (const radio of [providerOwnKey, providerLocalApi]) {
+    radio.addEventListener("change", async () => {
+      const saved = await saveSettings({ aiProvider: providerOwnKey.checked ? "own-key" : "local-api" });
+      renderAi(saved);
+    });
+  }
+  ownModel.addEventListener("change", () => void saveSettings({ ownModel: ownModel.value }));
+  saveOwnKey.addEventListener("click", async () => {
+    apiStatus.className = "status";
+    const key = ownKey.value.trim();
+    if (key) {
+      let granted = true;
+      try {
+        granted = await chrome.permissions.request({ origins: [OPENAI_ORIGIN] });
+      } catch {
+        granted = false;
+      }
+      if (!granted) {
+        apiStatus.className = "status bad";
+        apiStatus.textContent = "PromoLens needs permission to contact api.openai.com to use your key.";
+        return;
+      }
+      await saveSettings({ ownKey: key, ownModel: ownModel.value, aiProvider: "own-key", apiEnabled: true });
+      ownKey.value = "";
+      ownKey.placeholder = `saved key ending …${key.slice(-4)}`;
+    }
+    apiStatus.textContent = "Testing the key…";
+    const res = await send<SimpleResponse>({ type: "AI_TEST" });
+    apiStatus.className = `status ${res?.ok ? "ok" : "bad"}`;
+    apiStatus.textContent = res?.message ?? "Could not reach the background worker";
+  });
+
   // Official Reddit API login: only shown when the app is configured.
   const redditSection = $<HTMLElement>("redditSection");
   const dataApiEnabled = $<HTMLInputElement>("dataApiEnabled");

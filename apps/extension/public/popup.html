@@ -89,7 +89,7 @@
       @media (prefers-reduced-motion: reduce) {
         input[type="checkbox"][role="switch"], input[type="checkbox"][role="switch"]::after { transition: none; }
       }
-      input[type="url"] {
+      input[type="url"], input[type="password"], select {
         width: 100%;
         box-sizing: border-box;
         padding: 6px 8px;
@@ -100,6 +100,9 @@
         font: inherit;
         margin-top: 6px;
       }
+      label.row.sub { padding: 8px 0 2px; }
+      label.row.sub span { font-weight: 600; }
+      input[type="radio"] { accent-color: var(--accent); margin: 0; }
       button {
         font: inherit;
         padding: 6px 10px;
@@ -164,10 +167,35 @@
         <span>Deeper analysis (language model)</span>
         <input type="checkbox" role="switch" id="apiEnabled" />
       </label>
-      <p class="hint">Optional. When you click the button, the post's visible text and comments are also sent to the API you run on your own machine, where a language model adds quoted evidence. Off by default.</p>
-      <input type="url" id="apiBaseUrl" placeholder="http://127.0.0.1:8787" spellcheck="false" />
-      <button id="checkApi" type="button">Check connection</button>
-      <div class="status" id="apiStatus" role="status" aria-live="polite"></div>
+      <p class="hint">Optional. When you click the button, the post's text, comments and the author's history summary are also sent to a language model, which adds quoted evidence. The rule engine still computes the score. Off by default.</p>
+
+      <div id="aiOptions" hidden>
+        <label class="row sub">
+          <span>Use my own OpenAI API key</span>
+          <input type="radio" name="aiProvider" id="providerOwnKey" value="own-key" />
+        </label>
+        <div id="ownKeyFields">
+          <input type="password" id="ownKey" placeholder="sk-..." autocomplete="off" spellcheck="false" aria-label="OpenAI API key" />
+          <select id="ownModel" aria-label="Model">
+            <option value="gpt-5-mini">gpt-5-mini (fast, cheap - recommended)</option>
+            <option value="gpt-5">gpt-5</option>
+            <option value="gpt-4.1-mini">gpt-4.1-mini</option>
+            <option value="gpt-4.1">gpt-4.1</option>
+          </select>
+          <button id="saveOwnKey" type="button">Save and test key</button>
+          <p class="hint">Stored only in this extension on this device and sent only to OpenAI. Usage is billed to your OpenAI account - roughly half a cent per post with gpt-5-mini. Create a key at platform.openai.com/api-keys.</p>
+        </div>
+
+        <label class="row sub">
+          <span>Use a local API server (developers)</span>
+          <input type="radio" name="aiProvider" id="providerLocalApi" value="local-api" />
+        </label>
+        <div id="localApiFields">
+          <input type="url" id="apiBaseUrl" placeholder="http://127.0.0.1:8787" spellcheck="false" />
+          <button id="checkApi" type="button">Check connection</button>
+        </div>
+        <div class="status" id="apiStatus" role="status" aria-live="polite"></div>
+      </div>
     </section>
 
     <section>
