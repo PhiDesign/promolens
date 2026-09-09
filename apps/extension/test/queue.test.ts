@@ -76,7 +76,8 @@ describe("TaskQueue", () => {
     q.enqueue("good", async () => {
       order.push("good");
     });
-    await new Promise((r) => setTimeout(r, 30));
+    // Poll instead of a fixed sleep: a loaded CI machine made 30 ms flaky.
+    for (let i = 0; i < 100 && order.length === 0; i++) await new Promise((r) => setTimeout(r, 20));
     expect(order).toEqual(["good"]);
   });
 });

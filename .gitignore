@@ -22,3 +22,4 @@ coverage/
 # Evaluation: your own labelled posts and generated reports stay local
 apps/api/eval/local/
 apps/api/eval/results/
+promolens-*.zip

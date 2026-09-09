@@ -8,6 +8,11 @@
  *
  * While it is empty, the "Log in with Reddit" option stays hidden and the
  * extension keeps reading public pages with the user's own browser session.
+ *
+ * When you fill it in, also restore in public/manifest.json:
+ *   "permissions": ["storage", "identity"]
+ *   "host_permissions": [..., "https://oauth.reddit.com/*"]
+ * They were removed for the store build so the install prompt stays minimal.
  */
 export const REDDIT_CLIENT_ID = "";
 

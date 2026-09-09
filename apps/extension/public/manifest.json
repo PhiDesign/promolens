@@ -1,11 +1,11 @@
 {
   "manifest_version": 3,
   "name": "PromoLens",
-  "version": "0.2.0",
-  "description": "Estimates how likely Reddit posts are to be promotional, showing observable evidence and uncertainty. Not affiliated with Reddit.",
+  "version": "0.3.0",
+  "description": "On your click, estimates whether a Reddit post is promotional and whether the author disclosed it, with quoted evidence. Not affiliated with Reddit.",
   "minimum_chrome_version": "116",
-  "permissions": ["storage", "identity"],
-  "host_permissions": ["https://www.reddit.com/*", "https://oauth.reddit.com/*"],
+  "permissions": ["storage"],
+  "host_permissions": ["https://www.reddit.com/*"],
   "background": {
     "service_worker": "background.js"
   },

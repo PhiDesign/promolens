@@ -1,6 +1,6 @@
 {
   "name": "promolens",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "PromoLens - a Chrome extension that estimates how likely Reddit posts are to be promotional, with visible evidence and uncertainty.",
   "license": "MIT",
