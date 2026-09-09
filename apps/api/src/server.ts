@@ -145,8 +145,10 @@ if (isMainModule()) {
   }
   const config = loadConfig();
   const server = createApp(config);
-  server.listen(config.port, "127.0.0.1", () => {
-    console.log(`PromoLens API listening on http://127.0.0.1:${config.port} (provider: ${config.provider}${config.llmModel ? `, model: ${config.llmModel}` : ""}${config.quotaEnabled ? `, hosted tier: free ${config.freeInitial} then ${config.freeMonthly}/month, plus ${config.plusMonthly}/month` : ""})`);
+  // Local runs stay on loopback; hosts like Render need 0.0.0.0 (they set RENDER=true) or an explicit HOST.
+  const host = process.env.HOST ?? (process.env.RENDER || process.env.FLY_APP_NAME ? "0.0.0.0" : "127.0.0.1");
+  server.listen(config.port, host, () => {
+    console.log(`PromoLens API listening on http://${host}:${config.port} (provider: ${config.provider}${config.llmModel ? `, model: ${config.llmModel}` : ""}${config.quotaEnabled ? `, hosted tier: free ${config.freeInitial} then ${config.freeMonthly}/month, plus ${config.plusMonthly}/month` : ""})`);
     console.log(`Allowed origins: ${config.allowedOrigins.join(", ")}`);
     if (config.logRawContent) console.warn("LOG_RAW_CONTENT=true: raw post content logging is enabled (debug only).");
   });

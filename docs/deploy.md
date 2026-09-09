@@ -17,17 +17,35 @@ This is the server behind "included analyses" and PromoLens Plus. It is the same
 | `PORT` | whatever the host gives you (`process.env.PORT` is honoured) |
 | `LLM_TIMEOUT_MS` / `REQUEST_TIMEOUT_MS` | `45000` / `50000` |
 
-Run command: `npm run start --workspace=apps/api` after `npm ci && npm run build --workspace=apps/api` (the build bundles the server into `apps/api/dist/server.js`).
+Run command: `npm run start --workspace=apps/api` after `npm ci --include=dev && npm run build --workspace=apps/api` (the build bundles the server into `apps/api/dist/server.js`). The server binds to `0.0.0.0` automatically when `RENDER` or `FLY_APP_NAME` is set, or when `HOST` is given; locally it stays on `127.0.0.1`.
 
 ## Render (recommended for a first deployment)
 
-1. Create a **Web Service** from the GitHub repo. Runtime: Node. Root directory: leave as the repo root.
-2. Build command: `npm ci && npm run build --workspace=apps/api`. Start command: `npm run start --workspace=apps/api`.
-3. Instance: the smallest paid tier (free instances sleep and the first click of the day would time out).
-4. **Disks** → add a disk mounted at `/data` (1 GB is far more than enough) and set `DATA_DIR=/data`.
-5. Environment → add the variables above. Put the OpenAI key in as a secret; never commit it.
-6. Deploy. Open `https://<service>.onrender.com/api/v1/health` - it should report `provider: openai:gpt-5-mini`.
-7. Optional but recommended: a custom domain such as `api.promolens.app`, so the extension does not hard-code a host name that might change.
+1. Sign in at <https://dashboard.render.com> with GitHub and allow it to see the `PhiDesign/promolens` repository.
+2. **New → Web Service** → pick the repository. Settings:
+   - Name: `promolens-api` · Region: closest to you · Branch: `main` · Root Directory: *(leave empty)* · Runtime: **Node**.
+   - Build Command: `npm ci --include=dev && npm run build --workspace=apps/api`
+   - Start Command: `npm run start --workspace=apps/api`
+   - Instance type: the smallest **paid** one (free instances sleep; the first click of the day would time out).
+3. Before the first deploy, open **Advanced** (or after creation, the **Environment** tab) and add these variables (Render supplies `PORT` and `RENDER` itself):
+
+   | Key | Value |
+   | --- | --- |
+   | `ANALYSIS_PROVIDER` | `openai` |
+   | `ANALYSIS_PROVIDER_API_KEY` | your OpenAI key - paste it in the dashboard only |
+   | `LLM_MODEL` | `gpt-5-mini` |
+   | `LLM_TIMEOUT_MS` | `45000` |
+   | `REQUEST_TIMEOUT_MS` | `50000` |
+   | `QUOTA_ENABLED` | `true` |
+   | `LEMONSQUEEZY_PRODUCT_ID` | `1350697` |
+   | `DATA_DIR` | `/data` |
+   | `ALLOWED_ORIGINS` | `chrome-extension://*` |
+   | `LOG_RAW_CONTENT` | `false` |
+
+4. **Disks** tab → Add Disk: name `data`, mount path `/data`, size 1 GB. (This is what keeps the usage counts across restarts.)
+5. Click **Deploy** / **Manual Deploy → Deploy latest commit**. The log should end with `PromoLens API listening on http://0.0.0.0:<port> (provider: openai, model: gpt-5-mini, hosted tier: free 20 then 5/month, plus 500/month)`.
+6. Check it: open `https://promolens-api.onrender.com/api/v1/health` (your service URL) - it should show `"provider":"openai:gpt-5-mini"`.
+7. Optional but recommended later: a custom domain such as `api.promolens.app`, so the extension does not hard-code a host name that might change.
 
 ## Wire the extension to it
 
