@@ -69,7 +69,7 @@ export class ApiClient {
     }
   }
 
-  async analyze(baseUrl: string, post: PostInput, localSignals: Signal[], contentHash: string): Promise<AnalysisResult> {
+  async analyze(baseUrl: string, post: PostInput, localSignals: Signal[], contentHash: string, extraHeaders: Record<string, string> = {}): Promise<AnalysisResult> {
     const release = await this.semaphore.acquire();
     try {
       let res: Response;
@@ -78,7 +78,7 @@ export class ApiClient {
           `${baseUrl}/api/v1/analyze`,
           {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", ...extraHeaders },
             body: JSON.stringify({ post, localSignals, contentHash }),
           },
           this.timeoutMs,
@@ -86,6 +86,7 @@ export class ApiClient {
       } catch (err) {
         throw new ApiError("unreachable", err instanceof Error ? err.message : "API unreachable");
       }
+      if (res.status === 402) throw new ApiError("quota_exceeded", "Analysis allowance used up");
       if (!res.ok) throw new ApiError(`http_${res.status}`, `API responded with HTTP ${res.status}`);
       let json: unknown;
       try {

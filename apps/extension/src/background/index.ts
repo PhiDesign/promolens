@@ -26,6 +26,37 @@ import { fetchAuthorHistory, HistoryCache, type FetchLike } from "./history.js";
 import { fetchPostPage, normalizePermalink } from "./postFetch.js";
 import { analyzeWithOwnKey, ownKeyReady, testOwnKey } from "./ownKey.js";
 import { dataApiFetch, RedditAuth } from "./redditAuth.js";
+import { getInstallId } from "./installId.js";
+import { HOSTED_API_URL, isHostedConfigured } from "../shared/hostedApp.js";
+import type { QuotaInfo, QuotaResponse } from "../shared/messages.js";
+
+/** Talk to the hosted PromoLens API on behalf of this anonymous install. */
+async function hostedRequest(path: string, init: RequestInit = {}): Promise<QuotaResponse> {
+  if (!isHostedConfigured()) return { ok: false, message: "Hosted analyses are not available in this build." };
+  const installId = await getInstallId(chromeLocalStore());
+  try {
+    const res = await fetch(`${HOSTED_API_URL}${path}`, {
+      ...init,
+      headers: { ...(init.headers as Record<string, string> | undefined), "X-PromoLens-Install": installId },
+      signal: AbortSignal.timeout(10_000),
+    });
+    const body = (await res.json().catch(() => ({}))) as Partial<QuotaInfo> & { error?: { message?: string } };
+    if (!res.ok) return { ok: false, message: body.error?.message ?? `The PromoLens service answered HTTP ${res.status}` };
+    return {
+      ok: true,
+      quota: {
+        plan: body.plan === "plus" ? "plus" : "free",
+        used: body.used ?? 0,
+        limit: body.limit ?? 0,
+        remaining: body.remaining ?? 0,
+        resetsAt: body.resetsAt ?? "",
+        licensed: body.licensed === true,
+      },
+    };
+  } catch (err) {
+    return { ok: false, message: err instanceof Error && /abort|timeout/i.test(err.name + err.message) ? "The PromoLens service did not answer in time." : "The PromoLens service could not be reached." };
+  }
+}
 
 // Every Reddit request gets its own deadline so a slow listing answers with
 // "unavailable" instead of leaving the content script waiting on the worker.
@@ -189,6 +220,13 @@ async function handle(message: Message): Promise<unknown> {
             return response;
           }
           result = await analyzeWithOwnKey(message.post, message.localSignals, settings);
+        } else if (settings.aiProvider === "hosted") {
+          if (!isHostedConfigured()) {
+            const response: EnrichResponse = { ok: false, reason: "api_disabled" };
+            return response;
+          }
+          const installId = await getInstallId(chromeLocalStore());
+          result = await api.analyze(HOSTED_API_URL, message.post, message.localSignals, message.hash, { "X-PromoLens-Install": installId });
         } else {
           result = await api.analyze(settings.apiBaseUrl, message.post, message.localSignals, message.hash);
         }
@@ -208,6 +246,16 @@ async function handle(message: Message): Promise<unknown> {
       const response: SimpleResponse = await testOwnKey(settings);
       return response;
     }
+    case "QUOTA_GET":
+      return hostedRequest("/api/v1/quota");
+    case "LICENSE_ACTIVATE":
+      return hostedRequest("/api/v1/license", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ licenseKey: message.licenseKey.trim() }),
+      });
+    case "LICENSE_DETACH":
+      return hostedRequest("/api/v1/license", { method: "DELETE" });
     case "API_HEALTH": {
       const settings = await loadSettings();
       const status = await api.health(message.baseUrl ?? settings.apiBaseUrl);

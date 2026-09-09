@@ -102,6 +102,27 @@
       }
       [hidden] { display: none !important; }
       label.row.sub { padding: 8px 0 2px; }
+      a.button-link {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 6px 10px;
+        border-radius: 6px;
+        background: var(--accent);
+        color: #fff;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      input[type="text"] {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 6px 8px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: transparent;
+        color: var(--fg);
+        font: inherit;
+        margin-top: 8px;
+      }
       label.row.sub span { font-weight: 600; }
       input[type="radio"] { accent-color: var(--accent); margin: 0; }
       button {
@@ -171,7 +192,23 @@
       <p class="hint">Optional. When you click the button, the post's text, comments and the author's history summary are also sent to a language model, which adds quoted evidence. The rule engine still computes the score. Off by default.</p>
 
       <div id="aiOptions" hidden>
-        <label class="row sub" hidden>
+        <label class="row sub" id="providerHostedRow" hidden>
+          <span>Included analyses</span>
+          <input type="radio" name="aiProvider" id="providerHosted" value="hosted" />
+        </label>
+        <div id="hostedFields" hidden>
+          <div class="status" id="quotaStatus" role="status" aria-live="polite"></div>
+          <p class="hint" id="hostedHint">Free: 25 analyses to start, then 5 a month. PromoLens Plus: 500 a month.</p>
+          <a id="upgradeLink" class="button-link" href="#" target="_blank" rel="noopener noreferrer">Upgrade to Plus - $4.99 / month</a>
+          <div id="licenseFields">
+            <input type="text" id="licenseKey" placeholder="Paste your Plus licence key" autocomplete="off" spellcheck="false" aria-label="PromoLens Plus licence key" />
+            <button id="activateLicense" type="button">Activate</button>
+            <button id="removeLicense" type="button" hidden>Remove licence from this device</button>
+            <div class="status" id="licenseStatus" role="status" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <label class="row sub" id="providerOwnKeyRow" hidden>
           <span>Use my own OpenAI API key</span>
           <input type="radio" name="aiProvider" id="providerOwnKey" value="own-key" checked />
         </label>

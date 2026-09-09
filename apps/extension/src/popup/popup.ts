@@ -3,7 +3,8 @@
  * No inline scripts - this file is loaded from popup.html via <script src>.
  */
 import { loadSettings, saveSettings } from "../shared/settings.js";
-import type { CacheClearResponse, Message, RedditStatusResponse, SimpleResponse } from "../shared/messages.js";
+import { isHostedConfigured, PLUS_CHECKOUT_URL, PLUS_PRICE_LABEL } from "../shared/hostedApp.js";
+import type { CacheClearResponse, Message, QuotaResponse, RedditStatusResponse, SimpleResponse } from "../shared/messages.js";
 
 function $<T extends HTMLElement>(id: string): T {
   const el = document.getElementById(id);
@@ -69,27 +70,103 @@ async function init(): Promise<void> {
   const saveOwnKey = $<HTMLButtonElement>("saveOwnKey");
   const OPENAI_ORIGIN = "https://api.openai.com/*";
 
+  // Hosted tier (included analyses / Plus)
+  const hosted = isHostedConfigured();
+  const providerHosted = $<HTMLInputElement>("providerHosted");
+  const providerHostedRow = $<HTMLElement>("providerHostedRow");
+  const providerOwnKeyRow = $<HTMLElement>("providerOwnKeyRow");
+  const hostedFields = $<HTMLElement>("hostedFields");
+  const quotaStatus = $<HTMLDivElement>("quotaStatus");
+  const upgradeLink = $<HTMLAnchorElement>("upgradeLink");
+  const licenseKey = $<HTMLInputElement>("licenseKey");
+  const activateLicense = $<HTMLButtonElement>("activateLicense");
+  const removeLicense = $<HTMLButtonElement>("removeLicense");
+  const licenseStatus = $<HTMLDivElement>("licenseStatus");
+  upgradeLink.href = PLUS_CHECKOUT_URL;
+  upgradeLink.textContent = `Upgrade to Plus - ${PLUS_PRICE_LABEL}`;
+
+  const renderQuota = (q: QuotaResponse | undefined) => {
+    if (!q) {
+      quotaStatus.className = "status";
+      quotaStatus.textContent = "Checking your allowance…";
+      return;
+    }
+    if (!q.ok) {
+      quotaStatus.className = "status bad";
+      quotaStatus.textContent = q.message;
+      return;
+    }
+    const { plan, used, limit, remaining, resetsAt, licensed } = q.quota;
+    const reset = resetsAt ? new Date(resetsAt).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "";
+    quotaStatus.className = `status ${remaining > 0 ? "ok" : "bad"}`;
+    quotaStatus.textContent = `${plan === "plus" ? "PromoLens Plus" : "Free"}: ${remaining} of ${limit} analyses left this month${reset ? ` (resets ${reset})` : ""}${used ? ` · ${used} used` : ""}`;
+    upgradeLink.hidden = licensed;
+    removeLicense.hidden = !licensed;
+    licenseKey.hidden = licensed;
+    activateLicense.hidden = licensed;
+  };
+
+  const selectedProvider = () => (providerHosted.checked ? "hosted" : providerLocalApi.checked ? "local-api" : "own-key");
   const renderAi = (s: { apiEnabled: boolean; aiProvider: string; ownKey: string; ownModel: string }) => {
     aiOptions.hidden = !s.apiEnabled;
+    providerHosted.checked = s.aiProvider === "hosted";
     providerOwnKey.checked = s.aiProvider === "own-key";
     providerLocalApi.checked = s.aiProvider === "local-api";
+    // Choice rows only when there is a choice (hosted service configured).
+    providerHostedRow.hidden = !hosted;
+    providerOwnKeyRow.hidden = !hosted && s.aiProvider !== "local-api";
+    hostedFields.hidden = !hosted || s.aiProvider !== "hosted";
     ownKeyFields.hidden = s.aiProvider !== "own-key";
     // The local-API option is a developer setting: its fields only appear when it
     // was enabled outside the popup (see docs/testing.md).
     localApiFields.hidden = s.aiProvider !== "local-api";
     (providerLocalApi.closest("label") as HTMLElement | null)!.hidden = s.aiProvider !== "local-api";
-    (providerOwnKey.closest("label") as HTMLElement | null)!.hidden = s.aiProvider !== "local-api";
     ownModel.value = s.ownModel;
     if (s.ownKey && !ownKey.value) ownKey.placeholder = `saved key ending …${s.ownKey.slice(-4)}`;
+    if (hosted && s.apiEnabled && s.aiProvider === "hosted") {
+      renderQuota(undefined);
+      void send<QuotaResponse>({ type: "QUOTA_GET" }).then(renderQuota);
+    }
   };
   renderAi(settings);
-  apiEnabled.addEventListener("change", () => renderAi({ ...settings, apiEnabled: apiEnabled.checked, aiProvider: providerOwnKey.checked ? "own-key" : "local-api" }));
-  for (const radio of [providerOwnKey, providerLocalApi]) {
+  apiEnabled.addEventListener("change", async () => {
+    const saved = await saveSettings({ apiEnabled: apiEnabled.checked });
+    renderAi(saved);
+  });
+  for (const radio of [providerHosted, providerOwnKey, providerLocalApi]) {
     radio.addEventListener("change", async () => {
-      const saved = await saveSettings({ aiProvider: providerOwnKey.checked ? "own-key" : "local-api" });
+      const saved = await saveSettings({ aiProvider: selectedProvider() });
       renderAi(saved);
     });
   }
+  activateLicense.addEventListener("click", async () => {
+    const key = licenseKey.value.trim();
+    if (!key) {
+      licenseStatus.className = "status bad";
+      licenseStatus.textContent = "Paste the licence key from your Lemon Squeezy receipt email.";
+      return;
+    }
+    licenseStatus.className = "status";
+    licenseStatus.textContent = "Activating…";
+    const res = await send<QuotaResponse>({ type: "LICENSE_ACTIVATE", licenseKey: key });
+    if (res?.ok) {
+      await saveSettings({ licenseKey: key });
+      licenseKey.value = "";
+      licenseStatus.className = "status ok";
+      licenseStatus.textContent = "PromoLens Plus is active on this device.";
+    } else {
+      licenseStatus.className = "status bad";
+      licenseStatus.textContent = res?.message ?? "Could not reach the PromoLens service.";
+    }
+    renderQuota(res);
+  });
+  removeLicense.addEventListener("click", async () => {
+    const res = await send<QuotaResponse>({ type: "LICENSE_DETACH" });
+    await saveSettings({ licenseKey: "" });
+    licenseStatus.className = "status";
+    licenseStatus.textContent = res?.ok ? "Licence removed from this device." : (res?.message ?? "");
+    renderQuota(res);
+  });
   ownModel.addEventListener("change", () => void saveSettings({ ownModel: ownModel.value }));
   saveOwnKey.addEventListener("click", async () => {
     apiStatus.className = "status";

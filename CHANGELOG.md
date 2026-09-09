@@ -2,6 +2,13 @@
 
 All notable changes to PromoLens. Dates are when the version was tagged.
 
+## Unreleased (0.5.0)
+
+### Added
+- Included analyses: deeper analysis works out of the box through the hosted PromoLens service - 25 analyses to start, then 5 a month - identified only by an anonymous install id.
+- PromoLens Plus ($4.99/month, 500 analyses/month) via Lemon Squeezy: Upgrade link and licence-key activation in the popup.
+- API: `QUOTA_ENABLED` metering per install with a persistent usage file, `GET /api/v1/quota`, `POST`/`DELETE /api/v1/license`, 402 `quota_exceeded`, refunds when the model call fails; `docs/deploy.md`.
+
 ## 0.4.0 - 2026-09-09
 
 ### Added

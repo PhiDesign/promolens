@@ -89,7 +89,8 @@ export function applyCors(req: IncomingMessage, res: ServerResponse, allowedOrig
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Vary", "Origin");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-PromoLens-Install, X-PromoLens-License");
+    res.setHeader("Access-Control-Expose-Headers", "X-PromoLens-Quota-Used, X-PromoLens-Quota-Limit, X-PromoLens-Quota-Plan");
     res.setHeader("Access-Control-Max-Age", "600");
   }
   if (req.method === "OPTIONS") {

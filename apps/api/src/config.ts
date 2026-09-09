@@ -23,6 +23,18 @@ export interface ApiConfig {
   /** GPT-5 family answer length. Defaults to "low" for GPT-5 ids. */
   llmVerbosity: "low" | "medium" | "high" | undefined;
   logRawContent: boolean;
+  /**
+   * Hosted tier: meter analyses per anonymous install id and honour Plus
+   * licences. Off for a personal/local server (no headers required).
+   */
+  quotaEnabled: boolean;
+  /** Where the usage file lives. */
+  dataDir: string;
+  freeInitial: number;
+  freeMonthly: number;
+  plusMonthly: number;
+  /** Lemon Squeezy product a licence must belong to. */
+  lemonSqueezyProductId: number;
 }
 
 const REASONING_MODEL = /^(gpt-5|o[1-9])/i;
@@ -58,5 +70,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
     llmReasoningEffort: pick(env.LLM_REASONING_EFFORT, ["minimal", "low", "medium", "high"] as const, REASONING_MODEL.test(env.LLM_MODEL?.trim() ?? "") ? "low" : undefined),
     llmVerbosity: pick(env.LLM_VERBOSITY, ["low", "medium", "high"] as const, /^gpt-5/i.test(env.LLM_MODEL?.trim() ?? "") ? "low" : undefined),
     logRawContent: (env.LOG_RAW_CONTENT ?? "false").toLowerCase() === "true",
+    quotaEnabled: (env.QUOTA_ENABLED ?? "false").toLowerCase() === "true",
+    dataDir: env.DATA_DIR?.trim() || "./data",
+    freeInitial: num(env.FREE_INITIAL, 25),
+    freeMonthly: num(env.FREE_MONTHLY, 5),
+    plusMonthly: num(env.PLUS_MONTHLY, 500),
+    lemonSqueezyProductId: num(env.LEMONSQUEEZY_PRODUCT_ID, 0),
   };
 }

@@ -1,7 +1,8 @@
 /**
  * User settings, stored in chrome.storage.local under one key.
  */
-export type AiProvider = "own-key" | "local-api";
+/** hosted = PromoLens's included analyses (free allowance / Plus); own-key = the user's OpenAI key; local-api = developer server. */
+export type AiProvider = "hosted" | "own-key" | "local-api";
 
 export interface Settings {
   /** Show the PromoLens button on post pages. */
@@ -13,6 +14,8 @@ export interface Settings {
   /** Own-key mode: stored only in this extension's storage on this device; sent only to the provider. */
   ownKey: string;
   ownModel: string;
+  /** Hosted mode: the PromoLens Plus licence key the user activated (kept for display; the server holds the binding). */
+  licenseKey: string;
   /** Local-API mode. */
   apiBaseUrl: string;
   /** Cached results older than this are ignored. */
@@ -27,12 +30,17 @@ export interface Settings {
 
 export const OWN_KEY_MODELS = ["gpt-5-mini", "gpt-5", "gpt-4.1-mini", "gpt-4.1"] as const;
 
+import { isHostedConfigured } from "./hostedApp.js";
+
 export const DEFAULT_SETTINGS: Settings = {
   enabled: true,
-  apiEnabled: false,
-  aiProvider: "own-key",
+  // With a hosted service available, deeper analysis is on from the first click
+  // (free allowance). Without one, the user has to add a key first.
+  apiEnabled: isHostedConfigured(),
+  aiProvider: isHostedConfigured() ? "hosted" : "own-key",
   ownKey: "",
   ownModel: "gpt-5-mini",
+  licenseKey: "",
   apiBaseUrl: "http://127.0.0.1:8787",
   cacheTtlHours: 24,
   historyEnabled: true,
@@ -51,9 +59,11 @@ function sanitize(raw: unknown): Settings {
   return {
     enabled: typeof r.enabled === "boolean" ? r.enabled : DEFAULT_SETTINGS.enabled,
     apiEnabled: typeof r.apiEnabled === "boolean" ? r.apiEnabled : DEFAULT_SETTINGS.apiEnabled,
-    aiProvider: r.aiProvider === "local-api" ? "local-api" : "own-key",
+    aiProvider:
+      r.aiProvider === "local-api" ? "local-api" : r.aiProvider === "hosted" && isHostedConfigured() ? "hosted" : r.aiProvider === "own-key" ? "own-key" : DEFAULT_SETTINGS.aiProvider,
     ownKey,
     ownModel,
+    licenseKey: typeof r.licenseKey === "string" ? r.licenseKey.trim().slice(0, 80) : "",
     apiBaseUrl: url,
     cacheTtlHours: ttl,
     historyEnabled: typeof r.historyEnabled === "boolean" ? r.historyEnabled : DEFAULT_SETTINGS.historyEnabled,

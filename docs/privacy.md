@@ -7,6 +7,7 @@ Version 0.2, 8 September 2026. Published at <https://phidesign.github.io/promole
 ## Summary
 
 - PromoLens does **nothing until you click its button** on a post - on the post page or on a feed card. Feeds are never scanned or scored on their own.
+- With deeper analysis on (the default when the hosted service is available), the post you clicked is sent to the PromoLens service and on to a language-model provider, identified only by an anonymous install id; see "Included analyses" below. You can instead use your own OpenAI key, or switch deeper analysis off.
 - Analysis runs **in your browser** by default, on information already visible on that post page.
 - Nothing leaves your browser unless you switch on **Deeper analysis** in the popup, and then only the post you clicked goes to the server address you configured (by default `http://127.0.0.1:8787`, i.e. your own computer), and from there to the model provider you configured.
 - There are **no accounts, no analytics, no telemetry, no advertising, and no data selling**.
@@ -44,7 +45,13 @@ The extension requests the `storage` permission and host access to `https://www.
 
 **Deeper analysis on:** when you click the button, the background worker sends the fields listed above for that one post, plus the locally detected signals and a content hash, to the configured API URL over HTTP. The bundled API is designed to run on your own machine. If you point it at another machine, the same data goes there - only do that with a server you control and trust.
 
-## Optional deeper analysis with your own API key (off by default)
+## Included analyses and PromoLens Plus (hosted service)
+
+When **Deeper analysis** uses *Included analyses*, the post you clicked (title, body, up to 20 visible comments, the author-history summary and the rule signals) is sent to the PromoLens service, which forwards it to a language-model provider (OpenAI) and returns quoted evidence. To count analyses, the extension sends an **anonymous install id** - a random identifier created once on install. It is not linked to your name, email, Reddit account or IP beyond the request itself; reinstalling creates a new one. The service keeps: the install id, how many analyses were used this month, and - for Plus - the licence key you activated. It does not store post text (results are cached in memory for 24 hours, keyed by a hash), does not log post text, and does not sell or train on anything.
+
+PromoLens Plus is sold through Lemon Squeezy, which handles payment, invoices and your email; PromoLens never sees your card details. To stop the service from holding anything about your install, remove the licence in the popup (this deletes the binding) and uninstall the extension; the monthly counter for an install id is dropped after two months of inactivity.
+
+## Optional deeper analysis with your own API key
 
 If you switch on **Deeper analysis** and choose **Use my own OpenAI API key**, the extension itself sends the post you clicked (title, body, up to 20 visible comments, the author-history summary and the rule signals) to `api.openai.com` using your key, and receives quoted evidence back. Chrome asks you once for permission to contact that address; nothing is sent before you save a key.
 

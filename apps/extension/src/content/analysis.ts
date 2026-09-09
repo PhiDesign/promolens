@@ -175,6 +175,7 @@ function withEnrichFailure(result: AnalysisResult, reason: string): AnalysisResu
 export function describeEnrichFailure(reason: string): string {
   if (reason === "api_disabled") return "deeper analysis is switched off";
   if (reason === "no_key") return "no API key has been added yet";
+  if (reason === "quota_exceeded") return "this month's included analyses are used up; upgrade to Plus or add your own key in the popup";
   if (reason === "bad_key") return "the provider rejected the API key";
   if (reason === "timeout") return "the API took too long to answer";
   if (reason === "invalid_response" || reason === "invalid_json") return "the API returned an unexpected answer";
