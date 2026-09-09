@@ -33,6 +33,8 @@ Nothing happens on its own. A small button appears in the header of posts. Click
 
 Optionally, PromoLens also reads the author's recent public posts and comments (the same pages you could open yourself) to see whether the same product keeps coming back, and it can score a post straight from the feed without opening it. Both are one click, one post, never automatic, and can be switched off.
 
+Want deeper analysis? Paste your own OpenAI API key in the popup and a language model reviews the post, the comments and the author's history, adding quoted evidence and catching what pattern rules miss. The rule engine still computes every score, so results stay explainable. No server to run; the key stays on your device and usage is billed to your own OpenAI account.
+
 What it is not: PromoLens never labels people, never reports or hides anything, and never acts on your account. Every result is an estimate based on observable signals and can be wrong. Transparent promotion is treated as fine.
 
 Privacy: analysis runs in your browser. Results are cached on your device for 24 hours and can be cleared with one click. No accounts, no analytics, no data sold, no model training. An optional "deeper analysis" mode sends the post you clicked to a language model using your own OpenAI API key (or to a server you run yourself); it is off by default and asks for permission first. Full policy: https://phidesign.github.io/promolens/privacy
