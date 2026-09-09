@@ -2,7 +2,7 @@
 
 All notable changes to PromoLens. Dates are when the version was tagged.
 
-## Unreleased (0.4.0)
+## 0.4.0 - 2026-09-09
 
 ### Added
 - Bring your own key: paste an OpenAI API key in the popup and deeper analysis runs from the extension itself - no server. Optional permission for api.openai.com requested on save; key stored on-device only.

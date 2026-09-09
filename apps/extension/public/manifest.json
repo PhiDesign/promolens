@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "PromoLens",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Click a Reddit post to see how promotional it is, whether the author disclosed it, and the evidence. Not affiliated with Reddit.",
   "minimum_chrome_version": "116",
   "permissions": ["storage"],
