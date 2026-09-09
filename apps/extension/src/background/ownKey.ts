@@ -45,8 +45,20 @@ export async function analyzeWithOwnKey(
 export async function testOwnKey(settings: Pick<Settings, "ownKey" | "ownModel">, fetchFn?: typeof fetch): Promise<{ ok: boolean; message: string }> {
   if (!settings.ownKey.trim()) return { ok: false, message: "Paste your API key first." };
   try {
-    const text = await client(settings, fetchFn).complete("Reply with the single word: ok", "ok?", AbortSignal.timeout(20_000));
-    return { ok: true, message: `Key works (${settings.ownModel}: "${text.trim().slice(0, 20)}")` };
+    // The client always requests JSON output, and OpenAI rejects that unless the
+    // prompt mentions JSON - so the probe asks for a tiny JSON object.
+    const text = await client(settings, fetchFn).complete(
+      'You reply with JSON only. Respond with exactly {"ok": true}.',
+      "Respond with the JSON object.",
+      AbortSignal.timeout(20_000),
+    );
+    let parsedOk = false;
+    try {
+      parsedOk = (JSON.parse(text) as { ok?: unknown }).ok === true;
+    } catch {
+      /* not JSON: still a reachable model */
+    }
+    return { ok: true, message: parsedOk ? `Key works (${settings.ownModel}).` : `Key works (${settings.ownModel}); the model answered in an unexpected shape.` };
   } catch (err) {
     const m = err instanceof Error ? err.message : String(err);
     if (/401/.test(m)) return { ok: false, message: "The provider rejected the key (HTTP 401). Check it was copied completely." };

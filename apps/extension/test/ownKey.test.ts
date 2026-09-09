@@ -41,7 +41,11 @@ describe("own-key mode", () => {
   });
 
   it("test reports a working key, and a rejected one without echoing it", async () => {
-    expect((await testOwnKey(settings, fakeOpenAi("ok").fetchFn)).ok).toBe(true);
+    const good = fakeOpenAi('{"ok": true}');
+    expect((await testOwnKey(settings, good.fetchFn)).ok).toBe(true);
+    // OpenAI requires the word "json" in the prompt when JSON output is requested
+    const msgs = good.calls[0]?.body.messages as { content: string }[];
+    expect(msgs.some((m) => /json/i.test(m.content))).toBe(true);
     const bad = await testOwnKey(settings, fakeOpenAi("", 401).fetchFn);
     expect(bad.ok).toBe(false);
     expect(bad.message).toMatch(/401/);
