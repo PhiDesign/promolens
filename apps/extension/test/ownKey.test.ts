@@ -63,7 +63,7 @@ describe("settings sanitize own-key fields", () => {
     const s = await loadSettings();
     expect(s.ownKey).toBe("sk-x");
     expect(s.ownModel).toBe("gpt-5-mini");
-    expect(s.aiProvider).toBe("own-key");
+    expect(s.aiProvider).toBe(DEFAULT_SETTINGS.aiProvider); // "hosted" once a hosted URL is configured
     delete (globalThis as { chrome?: unknown }).chrome;
   });
 });
