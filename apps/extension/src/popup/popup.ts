@@ -74,7 +74,11 @@ async function init(): Promise<void> {
     providerOwnKey.checked = s.aiProvider === "own-key";
     providerLocalApi.checked = s.aiProvider === "local-api";
     ownKeyFields.hidden = s.aiProvider !== "own-key";
+    // The local-API option is a developer setting: its fields only appear when it
+    // was enabled outside the popup (see docs/testing.md).
     localApiFields.hidden = s.aiProvider !== "local-api";
+    (providerLocalApi.closest("label") as HTMLElement | null)!.hidden = s.aiProvider !== "local-api";
+    (providerOwnKey.closest("label") as HTMLElement | null)!.hidden = s.aiProvider !== "local-api";
     ownModel.value = s.ownModel;
     if (s.ownKey && !ownKey.value) ownKey.placeholder = `saved key ending …${s.ownKey.slice(-4)}`;
   };

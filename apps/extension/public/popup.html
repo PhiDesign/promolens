@@ -170,9 +170,9 @@
       <p class="hint">Optional. When you click the button, the post's text, comments and the author's history summary are also sent to a language model, which adds quoted evidence. The rule engine still computes the score. Off by default.</p>
 
       <div id="aiOptions" hidden>
-        <label class="row sub">
+        <label class="row sub" hidden>
           <span>Use my own OpenAI API key</span>
-          <input type="radio" name="aiProvider" id="providerOwnKey" value="own-key" />
+          <input type="radio" name="aiProvider" id="providerOwnKey" value="own-key" checked />
         </label>
         <div id="ownKeyFields">
           <input type="password" id="ownKey" placeholder="sk-..." autocomplete="off" spellcheck="false" aria-label="OpenAI API key" />
@@ -186,11 +186,14 @@
           <p class="hint">Stored only in this extension on this device and sent only to OpenAI. Usage is billed to your OpenAI account - roughly half a cent per post with gpt-5-mini. Create a key at platform.openai.com/api-keys.</p>
         </div>
 
-        <label class="row sub">
+        <!-- Developer option: hidden from the popup. Set aiProvider to "local-api" in
+             chrome.storage.local (promolens:settings) to route analysis through a
+             local API server; see docs/testing.md. -->
+        <label class="row sub" hidden>
           <span>Use a local API server (developers)</span>
           <input type="radio" name="aiProvider" id="providerLocalApi" value="local-api" />
         </label>
-        <div id="localApiFields">
+        <div id="localApiFields" hidden>
           <input type="url" id="apiBaseUrl" placeholder="http://127.0.0.1:8787" spellcheck="false" />
           <button id="checkApi" type="button">Check connection</button>
         </div>

@@ -108,6 +108,17 @@ Build (`npm run build`), load `apps/extension/dist` unpacked, then walk through:
 - [ ] Switch the toggle off: the next analysis reports history not checked (visible in the API log as `history: unavailable (history check is turned off)`).
 - [ ] Popup **Clear cached results** also clears cached histories.
 
+### Developer: route deeper analysis through a local API server
+
+The popup only offers "use my own OpenAI key". To use `apps/api` instead (evaluation, other providers, a shared server), open the extension's service-worker console from `chrome://extensions` and run:
+
+```js
+chrome.storage.local.get("promolens:settings", ({ "promolens:settings": s }) =>
+  chrome.storage.local.set({ "promolens:settings": { ...s, apiEnabled: true, aiProvider: "local-api", apiBaseUrl: "http://127.0.0.1:8787" } }));
+```
+
+The popup then shows the local-API fields (URL and **Check connection**) until you switch back to own-key mode.
+
 ### AI provider (optional)
 - [ ] With `ANALYSIS_PROVIDER=openai` and no key, `npm run dev:api` fails fast with a clear message.
 - [ ] With a valid key: **Check connection** shows `openai:<model>`; rings update a second time within ~5 s; the popover reasons quote the post.
