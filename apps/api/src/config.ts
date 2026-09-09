@@ -72,7 +72,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
     logRawContent: (env.LOG_RAW_CONTENT ?? "false").toLowerCase() === "true",
     quotaEnabled: (env.QUOTA_ENABLED ?? "false").toLowerCase() === "true",
     dataDir: env.DATA_DIR?.trim() || "./data",
-    freeInitial: num(env.FREE_INITIAL, 25),
+    freeInitial: num(env.FREE_INITIAL, 20),
     freeMonthly: num(env.FREE_MONTHLY, 5),
     plusMonthly: num(env.PLUS_MONTHLY, 500),
     lemonSqueezyProductId: num(env.LEMONSQUEEZY_PRODUCT_ID, 0),

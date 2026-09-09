@@ -10,7 +10,7 @@ export const HOSTED_API_URL = "";
 export const PLUS_CHECKOUT_URL = "https://promolens.lemonsqueezy.com/checkout/buy/0a4792a6-7f97-413a-af9b-dbdfc613ea25";
 export const PLUS_PRICE_LABEL = "$4.99 / month";
 export const PLUS_MONTHLY_ANALYSES = 500;
-export const FREE_INITIAL_ANALYSES = 25;
+export const FREE_INITIAL_ANALYSES = 20;
 export const FREE_MONTHLY_ANALYSES = 5;
 
 export function isHostedConfigured(): boolean {

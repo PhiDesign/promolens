@@ -11,7 +11,7 @@ This is the server behind "included analyses" and PromoLens Plus. It is the same
 | `LLM_MODEL` | `gpt-5-mini` |
 | `QUOTA_ENABLED` | `true` |
 | `LEMONSQUEEZY_PRODUCT_ID` | `1350697` |
-| `FREE_INITIAL` / `FREE_MONTHLY` / `PLUS_MONTHLY` | `25` / `5` / `500` (defaults) |
+| `FREE_INITIAL` / `FREE_MONTHLY` / `PLUS_MONTHLY` | `20` / `5` / `500` (defaults) |
 | `DATA_DIR` | a directory on a **persistent disk**, e.g. `/data` |
 | `ALLOWED_ORIGINS` | `chrome-extension://<your store extension id>` (use `chrome-extension://*` until the id is known) |
 | `PORT` | whatever the host gives you (`process.env.PORT` is honoured) |
@@ -33,12 +33,12 @@ Run command: `npm run start --workspace=apps/api` after `npm ci && npm run build
 
 1. Put the URL (no trailing slash) into `HOSTED_API_URL` in `apps/extension/src/shared/hostedApp.ts`.
 2. Add the host to the manifest: `"host_permissions": ["https://www.reddit.com/*", "https://<your api host>/*"]`.
-3. `npm run build`, test a click with a fresh profile (you should see "24 of 25 included analyses left" in the popup), then package for the store.
+3. `npm run build`, test a click with a fresh profile (you should see "19 of 20 included analyses left" in the popup), then package for the store.
 
 ## Operating it
 
 - **Logs** show only routes, status codes, timings and claim counts - never post text. `LOG_RAW_CONTENT` stays `false`.
 - **Usage file** (`/data/usage.json`) holds anonymous install ids, monthly counts, and for Plus installs the licence key and instance id. Nothing else. Losing it re-grants some free analyses; it is not precious.
-- **Model spend**: roughly $0.005 per analysis with `gpt-5-mini`. 1,000 free installs using their full 25 ≈ $125 once; 5/month after that ≈ $25/month. A Plus user at full use ≈ $2.50/month against $4.99. Set a spend limit on the OpenAI project.
+- **Model spend**: roughly $0.005 per analysis with `gpt-5-mini`. 1,000 free installs using their full 20 ≈ $100 once; 5/month after that ≈ $25/month. A Plus user at full use ≈ $2.50/month against $4.99. Set a spend limit on the OpenAI project.
 - **Abuse**: the per-client rate limiter (60/min default) and the per-install allowance are the two brakes. Reinstalling the extension yields a new install id and a fresh free allowance; that is accepted for now.
 - **Licences**: validated against Lemon Squeezy (cached 6 h). If Lemon Squeezy is unreachable, existing Plus installs keep Plus rather than being cut off.
