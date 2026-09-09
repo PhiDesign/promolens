@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "PromoLens",
   "version": "0.3.0",
-  "description": "On your click, estimates whether a Reddit post is promotional and whether the author disclosed it, with quoted evidence. Not affiliated with Reddit.",
+  "description": "Click a Reddit post to see how promotional it is, whether the author disclosed it, and the evidence. Not affiliated with Reddit.",
   "minimum_chrome_version": "116",
   "permissions": ["storage"],
   "host_permissions": ["https://www.reddit.com/*"],
