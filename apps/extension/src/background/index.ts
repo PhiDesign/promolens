@@ -38,7 +38,7 @@ async function hostedRequest(path: string, init: RequestInit = {}): Promise<Quot
     const res = await fetch(`${HOSTED_API_URL}${path}`, {
       ...init,
       headers: { ...(init.headers as Record<string, string> | undefined), "X-PromoLens-Install": installId },
-      signal: AbortSignal.timeout(10_000),
+      signal: AbortSignal.timeout(25_000), // licence activation waits on Lemon Squeezy plus a cold Worker
     });
     const body = (await res.json().catch(() => ({}))) as Partial<QuotaInfo> & { error?: { message?: string } };
     if (!res.ok) return { ok: false, message: body.error?.message ?? `The PromoLens service answered HTTP ${res.status}` };
