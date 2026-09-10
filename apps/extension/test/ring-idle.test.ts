@@ -40,3 +40,25 @@ describe("ring on-demand mode", () => {
     expect(onActivate).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("ring notice state (out of included analyses)", () => {
+  it("shows a gray '!' ring, a message card with a link on hover, and still retries on click", () => {
+    const doc = document;
+    let activated = 0;
+    const ring = createRing(doc, { onActivate: () => activated++ });
+    doc.body.appendChild(ring.host);
+    ring.setNotice("Included analyses used up", ["Free analyses are used up.", { text: "Upgrade", href: "https://example.test/buy" }], "PromoLens: out of analyses");
+    expect(ring.state).toBe("error");
+    expect(ring.host.shadowRoot?.querySelector(".num")?.textContent).toBe("!");
+    expect(ring.button.getAttribute("aria-label")).toMatch(/out of analyses. Press to try again/);
+    ring.button.dispatchEvent(new MouseEvent("mouseenter"));
+    const card = doc.querySelector("promolens-popover")?.shadowRoot;
+    expect(card?.textContent).toContain("Included analyses used up");
+    const link = card?.querySelector("a") as HTMLAnchorElement | null;
+    expect(link?.href).toBe("https://example.test/buy");
+    expect(link?.target).toBe("_blank");
+    ring.button.click();
+    expect(activated).toBe(1);
+    ring.destroy();
+  });
+});

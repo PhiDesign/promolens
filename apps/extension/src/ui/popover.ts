@@ -84,7 +84,7 @@ export class PopoverController {
   }
 
   /** A plain text card (used for the idle "click to analyse" hint). */
-  showMessage(anchor: HTMLElement, heading: string, lines: string[], pinned: boolean): void {
+  showMessage(anchor: HTMLElement, heading: string, lines: MessageLine[], pinned: boolean): void {
     this.present(anchor, pinned, () => this.renderMessage(heading, lines));
   }
 
@@ -189,7 +189,7 @@ export class PopoverController {
     card.append(score, meta, list, foot);
   }
 
-  private renderMessage(heading: string, lines: string[]): void {
+  private renderMessage(heading: string, lines: MessageLine[]): void {
     const card = this.card;
     if (!card) return;
     card.replaceChildren();
@@ -197,7 +197,21 @@ export class PopoverController {
     const head = el(this.doc, "div", "head");
     head.append(el(this.doc, "span", "label", heading));
     card.appendChild(head);
-    for (const line of lines) card.appendChild(el(this.doc, "p", "meta", line));
+    for (const line of lines) {
+      if (typeof line === "string") {
+        card.appendChild(el(this.doc, "p", "meta", line));
+        continue;
+      }
+      const p = el(this.doc, "p", "meta");
+      const a = this.doc.createElement("a");
+      a.className = "source";
+      a.href = line.href;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.textContent = line.text;
+      p.appendChild(a);
+      card.appendChild(p);
+    }
   }
 
   private position(): void {
@@ -217,6 +231,9 @@ export class PopoverController {
     host.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px)`;
   }
 }
+
+/** A message-card line: plain text, or a link. */
+export type MessageLine = string | { text: string; href: string };
 
 function el(doc: Document, tag: string, className: string, text?: string): HTMLElement {
   const node = doc.createElement(tag);

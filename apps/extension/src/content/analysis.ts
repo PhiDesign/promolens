@@ -15,7 +15,9 @@
 import { analyzePost, hashPostContent, type AnalysisResult, type AuthorHistory } from "@promolens/shared/light";
 import { extractPost } from "../reddit/adapter.js";
 import type { CacheGetResponse, EnrichResponse, HistoryResponse, PostGetResponse } from "../shared/messages.js";
+import { PLUS_CHECKOUT_URL, PLUS_MONTHLY_ANALYSES, PLUS_PRICE_LABEL } from "../shared/hostedApp.js";
 import type { Settings } from "../shared/settings.js";
+import type { MessageLine } from "../ui/popover.js";
 import { send } from "./bridge.js";
 import { debug, warn } from "./debug.js";
 import type { CancelToken } from "./queue.js";
@@ -142,6 +144,14 @@ async function runPipeline(record: PostRecord, settings: Settings, token: Cancel
       finish(record, enriched.result, token);
       return; // background worker already cached it
     }
+    if (enriched?.reason === "quota_exceeded") {
+      // Out of included analyses: say so instead of quietly showing a rules-only
+      // score the user would mistake for the real thing. Nothing is cached, so a
+      // click after upgrading runs the full analysis.
+      record.ring.setNotice("Included analyses used up", quotaNoticeLines(), "PromoLens: this month's included analyses are used up");
+      record.status = "error";
+      return;
+    }
     // API unavailable or malformed: show the local result (its confidence
     // already reflects the limited evidence) and say why in the card footer.
     result = withEnrichFailure(result, enriched ? enriched.reason : "no_response");
@@ -150,6 +160,14 @@ async function runPipeline(record: PostRecord, settings: Settings, token: Cancel
 
   if (!cached?.result) void send({ type: "CACHE_PUT", hash, result });
   finish(record, result, token);
+}
+
+export function quotaNoticeLines(): MessageLine[] {
+  return [
+    `You have used this month's free analyses. PromoLens Plus gives ${PLUS_MONTHLY_ANALYSES} a month for ${PLUS_PRICE_LABEL}.`,
+    { text: "Upgrade to PromoLens Plus", href: PLUS_CHECKOUT_URL },
+    "Or open the PromoLens toolbar popup and add your own OpenAI API key (unlimited, billed by OpenAI).",
+  ];
 }
 
 /** Attach a zero-weight note explaining why deeper analysis did not happen. */

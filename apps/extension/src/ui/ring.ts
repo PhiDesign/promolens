@@ -8,7 +8,7 @@
  * click pins it open so touchpad and keyboard users can read it; Escape closes.
  */
 import { accessibleSummary, ringStateFor, type AnalysisResult, type RingState } from "@promolens/shared/light";
-import { getPopover } from "./popover.js";
+import { getPopover, type MessageLine } from "./popover.js";
 import { RING_CSS } from "./styles.js";
 import { detectTheme } from "./theme.js";
 
@@ -32,6 +32,8 @@ export interface RingHandle {
   setAnalyzing(): void;
   setResult(result: AnalysisResult): void;
   setError(message?: string): void;
+  /** Gray "!" ring: hover shows the heading and lines, click runs the analysis again. */
+  setNotice(heading: string, lines: MessageLine[], ariaLabel: string): void;
   destroy(): void;
 }
 
@@ -74,6 +76,7 @@ export function createRing(doc: Document = document, options: RingOptions = {}):
 
   let state: RingState = "analyzing";
   let result: AnalysisResult | undefined;
+  let notice: { heading: string; lines: MessageLine[] } | undefined;
   const popover = getPopover();
 
   const setState = (next: RingState) => {
@@ -84,12 +87,17 @@ export function createRing(doc: Document = document, options: RingOptions = {}):
   const IDLE_LABEL = "PromoLens: analyse this post for promotional signals";
   const idleLines = () => [
     "Runs PromoLens on this post's visible text and comments.",
-    "Local rules run instantly. If deeper analysis is enabled in the toolbar popup, the text is also sent to the API you run on your own machine.",
+    "With deeper analysis on (the default), that one post is also sent to a language model for quoted evidence.",
     "Nothing is sent until you click.",
   ];
 
   const open = (pinned: boolean) => {
     host.dataset.theme = detectTheme(doc);
+    if (notice) {
+      if (pinned && popover.isPinnedTo(button)) popover.hide();
+      else if (pinned || !popover.isPinnedTo(button)) popover.showMessage(button, notice.heading, notice.lines, pinned);
+      return;
+    }
     if (!result) {
       if (state === "idle" && !pinned && !popover.isPinnedTo(button)) {
         popover.showMessage(button, "Analyse this post", idleLines(), false);
@@ -140,6 +148,7 @@ export function createRing(doc: Document = document, options: RingOptions = {}):
     },
     setIdle() {
       result = undefined;
+      notice = undefined;
       setState("idle");
       arc.setAttribute("stroke-dashoffset", "0");
       num.textContent = "?";
@@ -149,6 +158,7 @@ export function createRing(doc: Document = document, options: RingOptions = {}):
     },
     setAnalyzing() {
       result = undefined;
+      notice = undefined;
       setState("analyzing");
       arc.setAttribute("stroke-dashoffset", String(CIRCUMFERENCE));
       num.textContent = "";
@@ -157,6 +167,7 @@ export function createRing(doc: Document = document, options: RingOptions = {}):
     },
     setResult(next: AnalysisResult) {
       result = next;
+      notice = undefined;
       setState(ringStateFor(next));
       const fraction = Math.max(0, Math.min(100, next.promoLikelihood)) / 100;
       arc.setAttribute("stroke-dashoffset", String(CIRCUMFERENCE * (1 - fraction)));
@@ -168,12 +179,23 @@ export function createRing(doc: Document = document, options: RingOptions = {}):
     },
     setError(message = "PromoLens: analysis unavailable for this post") {
       result = undefined;
+      notice = undefined;
       setState("error");
       arc.setAttribute("stroke-dashoffset", String(CIRCUMFERENCE));
       num.textContent = "–";
       button.setAttribute("aria-label", options.onActivate ? `${message}. Press to try again` : message);
       button.removeAttribute("aria-busy");
       if (popover.isShowing(button)) popover.hide();
+    },
+    setNotice(heading, lines, ariaLabel) {
+      result = undefined;
+      notice = { heading, lines };
+      setState("error");
+      arc.setAttribute("stroke-dashoffset", "0");
+      num.textContent = "!";
+      button.setAttribute("aria-label", options.onActivate ? `${ariaLabel}. Press to try again` : ariaLabel);
+      button.removeAttribute("aria-busy");
+      if (popover.isShowing(button)) popover.showMessage(button, heading, lines, popover.isPinnedTo(button));
     },
     destroy() {
       if (popover.isShowing(button)) popover.hide();

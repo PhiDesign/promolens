@@ -11,6 +11,7 @@ All notable changes to PromoLens. Dates are when the version was tagged.
 - Deeper analysis is on by default (Included analyses); switching it off keeps everything in the browser.
 
 ### Fixed
+- When the included analyses are used up, the button shows a gray "!" with an upgrade card instead of quietly falling back to a rules-only score.
 - Upgrading to Plus starts with the full 500: free-tier usage no longer counts against the Plus allowance.
 - Licence activation read Lemon Squeezy's `activated` flag; before this, every activation was reported as failed and retries used up the key's device slots.
 

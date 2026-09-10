@@ -129,6 +129,7 @@ export const RING_CSS = `
   :host([data-state="error"]) .arc { --pl-color: var(--pl-gray); }
   :host([data-state="idle"]) .arc { stroke-dasharray: 3 3.5; }
   :host([data-state="idle"]) .num { fill: var(--pl-muted); font-size: 10px; }
+  :host([data-state="error"]) .num { fill: var(--pl-muted); font-size: 10px; }
   :host([data-state="idle"]) button:hover .arc,
   :host([data-state="idle"]) button:focus-visible .arc { stroke: var(--pl-focus); stroke-dasharray: none; }
   :host([data-state="idle"]) button:hover .num,
