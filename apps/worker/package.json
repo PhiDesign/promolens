@@ -1,0 +1,20 @@
+{
+  "name": "@promolens/worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PromoLens hosted API as a Cloudflare Worker (free tier). Same routes as apps/api; usage counts live in Workers KV.",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@promolens/shared": "*",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250903.0",
+    "wrangler": "^4.35.0"
+  }
+}

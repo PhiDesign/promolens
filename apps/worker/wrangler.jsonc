@@ -1,0 +1,26 @@
+// Cloudflare Worker for the hosted PromoLens API. See docs/deploy.md.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "promolens-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "observability": { "enabled": true },
+  // Non-secret settings. The model key is a secret: `npx wrangler secret put ANALYSIS_PROVIDER_API_KEY`.
+  "vars": {
+    "ANALYSIS_PROVIDER": "openai",
+    "LLM_MODEL": "gpt-5-mini",
+    "LLM_TIMEOUT_MS": "45000",
+    "REQUEST_TIMEOUT_MS": "50000",
+    "QUOTA_ENABLED": "true",
+    "LEMONSQUEEZY_PRODUCT_ID": "1350697",
+    "FREE_INITIAL": "20",
+    "FREE_MONTHLY": "5",
+    "PLUS_MONTHLY": "500",
+    "ALLOWED_ORIGINS": "chrome-extension://*",
+    "LOG_RAW_CONTENT": "false"
+  },
+  // Usage counts per anonymous install id. Create with: npx wrangler kv namespace create USAGE
+  "kv_namespaces": [{ "binding": "USAGE", "id": "REPLACE_WITH_NAMESPACE_ID" }]
+}

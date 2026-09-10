@@ -1,57 +1,34 @@
 /**
- * Per-install analysis allowance.
+ * Per-install analysis allowance, stored in a small JSON file (Node server).
+ * The rules live in quotaCore.ts; this file only adds persistence.
  *
- * Identity is an anonymous install id the extension generates once (a UUID);
- * no account, no email. Free installs get a one-time allowance in their first
- * calendar month and a small monthly refill after that; Plus installs (valid
- * licence) get a larger monthly allowance.
- *
- * State is a small JSON file (installs are few, records are tiny). Writes are
- * debounced. Losing the file only means a few free analyses are granted again.
+ * Installs are few and records are tiny. Writes are debounced. Losing the
+ * file only means a few free analyses are granted again.
  */
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
+import {
+  consumeRecord,
+  isIdle,
+  newRecord,
+  refundRecord,
+  statusOf,
+  type InstallRecord,
+  type LicenseBinding,
+  type PlanLimits,
+  type PlanName,
+  type QuotaBackend,
+  type QuotaStatus,
+} from "./quotaCore.js";
 
-export interface PlanLimits {
-  freeInitial: number;
-  freeMonthly: number;
-  plusMonthly: number;
-}
-
-export type PlanName = "free" | "plus";
-
-export interface QuotaStatus {
-  plan: PlanName;
-  used: number;
-  limit: number;
-  remaining: number;
-  /** ISO date when the monthly counter resets (first of next month, UTC). */
-  resetsAt: string;
-  /** Calendar month key, e.g. "2026-09". */
-  month: string;
-}
-
-interface InstallRecord {
-  firstMonth: string;
-  months: Record<string, number>;
-  licenseKey?: string;
-  instanceId?: string;
-}
+export { INSTALL_ID_RE, monthKey, type PlanLimits, type PlanName, type QuotaBackend, type QuotaStatus } from "./quotaCore.js";
 
 interface StoreFile {
   version: 1;
   installs: Record<string, InstallRecord>;
 }
 
-export function monthKey(now: Date): string {
-  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
-}
-
-function nextMonthStart(now: Date): string {
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1)).toISOString();
-}
-
-export class QuotaStore {
+export class QuotaStore implements QuotaBackend {
   private data: StoreFile = { version: 1, installs: {} };
   private dirty = false;
   private flushTimer: ReturnType<typeof setTimeout> | undefined;
@@ -74,15 +51,12 @@ export class QuotaStore {
     this.prune();
   }
 
-  /** Forget free installs with no activity in the last two months (privacy: keep nothing we do not need). */
+  /** Forget free installs with no activity in the last two months. */
   prune(): number {
     const now = this.now();
-    const keep = new Set([monthKey(now), monthKey(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1)))]);
     let removed = 0;
     for (const [id, r] of Object.entries(this.data.installs)) {
-      if (r.licenseKey) continue;
-      const active = Object.keys(r.months).some((m) => keep.has(m)) || keep.has(r.firstMonth);
-      if (!active) {
+      if (isIdle(r, now)) {
         delete this.data.installs[id];
         removed++;
       }
@@ -112,45 +86,28 @@ export class QuotaStore {
   private record(installId: string): InstallRecord {
     let r = this.data.installs[installId];
     if (!r) {
-      r = { firstMonth: monthKey(this.now()), months: {} };
+      r = newRecord(this.now());
       this.data.installs[installId] = r;
       this.scheduleFlush();
     }
     return r;
   }
 
-  private limitFor(r: InstallRecord, plan: PlanName, month: string): number {
-    if (plan === "plus") return this.limits.plusMonthly;
-    return month === r.firstMonth ? this.limits.freeInitial : this.limits.freeMonthly;
-  }
-
   status(installId: string, plan: PlanName): QuotaStatus {
-    const now = this.now();
-    const month = monthKey(now);
-    const r = this.record(installId);
-    const used = r.months[month] ?? 0;
-    const limit = this.limitFor(r, plan, month);
-    return { plan, used, limit, remaining: Math.max(0, limit - used), resetsAt: nextMonthStart(now), month };
+    return statusOf(this.limits, this.record(installId), plan, this.now());
   }
 
   /** Reserve one analysis if the allowance permits. Returns the status after the attempt. */
   consume(installId: string, plan: PlanName): { allowed: boolean; status: QuotaStatus } {
-    const before = this.status(installId, plan);
-    if (before.remaining <= 0) return { allowed: false, status: before };
-    const r = this.record(installId);
-    r.months[before.month] = (r.months[before.month] ?? 0) + 1;
-    // Keep the record small: drop months older than the previous one.
-    for (const m of Object.keys(r.months)) if (m < before.month && m !== r.firstMonth) delete r.months[m];
-    this.scheduleFlush();
-    return { allowed: true, status: this.status(installId, plan) };
+    const result = consumeRecord(this.limits, this.record(installId), plan, this.now());
+    if (result.allowed) this.scheduleFlush();
+    return result;
   }
 
   /** Give one back (the analysis failed on our side). */
   refund(installId: string, month: string): void {
     const r = this.data.installs[installId];
-    if (!r || !r.months[month]) return;
-    r.months[month] = Math.max(0, r.months[month]! - 1);
-    this.scheduleFlush();
+    if (r && refundRecord(r, month)) this.scheduleFlush();
   }
 
   /** Remember which licence an install activated (so the key need not be sent every time). */
@@ -168,7 +125,7 @@ export class QuotaStore {
     this.scheduleFlush();
   }
 
-  license(installId: string): { licenseKey?: string; instanceId?: string } {
+  license(installId: string): LicenseBinding {
     const r = this.data.installs[installId];
     return { licenseKey: r?.licenseKey, instanceId: r?.instanceId };
   }
@@ -177,6 +134,3 @@ export class QuotaStore {
     return Object.keys(this.data.installs).length;
   }
 }
-
-/** Anonymous install ids are UUIDs; reject anything else so the store cannot be polluted. */
-export const INSTALL_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

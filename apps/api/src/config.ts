@@ -50,7 +50,9 @@ function num(value: string | undefined, fallback: number): number {
   return Number.isFinite(n) && n > 0 ? n : fallback;
 }
 
-export function loadConfig(env: NodeJS.ProcessEnv = process.env): ApiConfig {
+export type EnvSource = Record<string, string | undefined>;
+
+export function loadConfig(env: EnvSource = process.env): ApiConfig {
   const origins = (env.ALLOWED_ORIGINS ?? "chrome-extension://*,http://localhost:5173,http://127.0.0.1:5173")
     .split(",")
     .map((s) => s.trim())

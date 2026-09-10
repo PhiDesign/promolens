@@ -3,18 +3,9 @@
  * size limit, and CORS. Kept small on purpose so the whole server is readable.
  */
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { errorBody, HttpError } from "./errors.js";
 
-export class HttpError extends Error {
-  constructor(
-    public readonly status: number,
-    public readonly code: string,
-    message: string,
-    public readonly details?: unknown,
-  ) {
-    super(message);
-    this.name = "HttpError";
-  }
-}
+export { HttpError } from "./errors.js";
 
 export function sendJson(res: ServerResponse, status: number, body: unknown): void {
   const payload = JSON.stringify(body);
@@ -28,9 +19,7 @@ export function sendJson(res: ServerResponse, status: number, body: unknown): vo
 }
 
 export function sendError(res: ServerResponse, err: HttpError): void {
-  sendJson(res, err.status, {
-    error: { code: err.code, message: err.message, ...(err.details !== undefined ? { details: err.details } : {}) },
-  });
+  sendJson(res, err.status, errorBody(err));
 }
 
 /** Read and parse a JSON body, rejecting bodies larger than `maxBytes`. */

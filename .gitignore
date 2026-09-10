@@ -24,3 +24,6 @@ apps/api/eval/local/
 apps/api/eval/results/
 promolens-*.zip
 store-assets/
+
+# Wrangler local state
+.wrangler/

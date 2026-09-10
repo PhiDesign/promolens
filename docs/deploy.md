@@ -60,3 +60,23 @@ Run command: `npm run start --workspace=apps/api` after `npm ci --include=dev &&
 - **Model spend**: roughly $0.005 per analysis with `gpt-5-mini`. 1,000 free installs using their full 20 ≈ $100 once; 5/month after that ≈ $25/month. A Plus user at full use ≈ $2.50/month against $4.99. Set a spend limit on the OpenAI project.
 - **Abuse**: the per-client rate limiter (60/min default) and the per-install allowance are the two brakes. Reinstalling the extension yields a new install id and a fresh free allowance; that is accepted for now.
 - **Licences**: validated against Lemon Squeezy (cached 6 h). If Lemon Squeezy is unreachable, existing Plus installs keep Plus rather than being cut off.
+
+## Cloudflare Workers (free; the current production host)
+
+`apps/worker` is the same API packaged as a Worker: identical routes and behaviour, usage counts in Workers KV instead of a file. The free plan (100,000 requests/day, 10 ms CPU per request - waiting on the model does not count) is far more than PromoLens needs, so the fixed cost is zero.
+
+One-time setup, from a terminal in the repository:
+
+1. `npx wrangler login` - opens the browser to authorise Wrangler on your Cloudflare account (create a free account first at <https://dash.cloudflare.com/sign-up> if needed).
+2. `cd apps/worker && npx wrangler kv namespace create USAGE` - prints an `id`; paste it into `apps/worker/wrangler.jsonc` in place of `REPLACE_WITH_NAMESPACE_ID`.
+3. `npx wrangler secret put ANALYSIS_PROVIDER_API_KEY` - paste your OpenAI key when prompted. It is stored encrypted on Cloudflare; never in the repository.
+4. `npx wrangler deploy` - prints the URL, `https://promolens-api.<your-subdomain>.workers.dev`.
+5. Check `https://promolens-api.<your-subdomain>.workers.dev/api/v1/health` shows `"provider":"openai:gpt-5-mini"`.
+
+Every later release is just `npm run deploy --workspace=apps/worker`. Non-secret settings live in `wrangler.jsonc` under `vars`; logs are in the Cloudflare dashboard under Workers → promolens-api → Logs (route, status, timing, never post text).
+
+Differences from the Node server worth knowing:
+
+- **Usage records** are one KV entry per install id. Free records expire on their own after 70 days without activity (the same "forget idle installs" rule); Plus records never expire. KV is eventually consistent, so two clicks in the same second could both pass with one analysis left - the worst case is one extra free analysis.
+- **Rate limiting and the 24-hour result cache** are per Worker instance rather than global. Fine at this scale.
+- **Custom domain** (recommended before the store listing goes public): Workers → promolens-api → Settings → Domains & Routes → add `api.promolens.app` or similar, then update `HOSTED_API_URL` and the manifest host permission once.
