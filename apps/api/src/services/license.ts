@@ -28,7 +28,10 @@ export interface LicenseClientOptions {
 }
 
 interface LsResponse {
+  /** validate answers with `valid`; activate with `activated`; deactivate with `deactivated`. */
   valid?: boolean;
+  activated?: boolean;
+  deactivated?: boolean;
   error?: string | null;
   license_key?: { status?: string; activation_limit?: number | null; activation_usage?: number };
   instance?: { id?: string } | null;
@@ -68,7 +71,8 @@ export class LicenseClient {
     const productId = body.meta?.product_id;
     if (productId !== undefined && productId !== this.options.productId) return { valid: false, reason: "wrong_product", productId };
     const status = body.license_key?.status;
-    if (body.valid !== true) {
+    const ok = body.valid === true || body.activated === true;
+    if (!ok) {
       const err = (body.error ?? "").toLowerCase();
       if (/not found|invalid/.test(err)) return { valid: false, reason: "not_found", status };
       if (status === "expired" || /expired/.test(err)) return { valid: false, reason: "expired", status };

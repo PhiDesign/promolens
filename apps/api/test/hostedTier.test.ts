@@ -29,8 +29,10 @@ const config = loadConfig({
 const fakeLs: typeof fetch = async (url, init) => {
   const form = new URLSearchParams(String(init?.body));
   const ok = form.get("license_key") === GOOD_KEY;
+  // Lemon Squeezy answers activate with `activated`, validate with `valid`.
+  const flag = String(url).endsWith("/activate") ? { activated: true } : { valid: true };
   const body = ok
-    ? { valid: true, error: null, license_key: { status: "active" }, instance: { id: "inst_1" }, meta: { product_id: 1350697 } }
+    ? { ...flag, error: null, license_key: { status: "active" }, instance: { id: "inst_1" }, meta: { product_id: 1350697 } }
     : { valid: false, error: "license_key not found." };
   return new Response(JSON.stringify(body), { status: 200 });
 };

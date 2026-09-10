@@ -102,7 +102,7 @@ describe("LicenseClient", () => {
   });
 
   it("activate binds the key to the install id and returns the instance", async () => {
-    const ls = fakeLs((path, form) => (path === "activate" && form.get("instance_name") === ID ? good : { valid: false, error: "bad" }));
+    const ls = fakeLs((path, form) => (path === "activate" && form.get("instance_name") === ID ? { ...good, valid: undefined, activated: true } : { valid: false, error: "bad" }));
     const c = new LicenseClient({ productId: 1350697, fetchFn: ls.fetchFn });
     const r = await c.activate("KEY-1", ID);
     expect(r).toMatchObject({ valid: true, instanceId: "inst_9" });
