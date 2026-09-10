@@ -12,7 +12,7 @@ PromoLens never analyses anything on its own. A small gray **?** button sits in 
 
 1. **Author history**: the author's recent *public* posts and comments are read - the same pages you could open yourself - to see whether the same product keeps coming back, whether a near-identical post was published elsewhere, and whether the author has said "my app" / "I'm the founder" somewhere else.
 2. **Rule engine**: scores the post plus that history in the browser, in milliseconds.
-3. **Language model**: the post and the history summary go to the PromoLens service, to OpenAI with your own key, or to a local API you run, where a language model adds quoted evidence - including its own observations outside the named criteria, capped so they can never dominate - and the rule engine produces the final number. With deeper analysis on, the ring shows one result, not a preliminary score that later changes.
+3. **Language model**: the post and the history summary go to the PromoLens service, to OpenAI with your own key, or to a local API you run, where a language model adds quoted evidence - including its own observations outside the named criteria, capped so they can never dominate - and the rule engine produces the final number. The ring shows one result, not a preliminary score that later changes.
 
 Hover, focus, or click the ring to see a compact evidence card:
 
