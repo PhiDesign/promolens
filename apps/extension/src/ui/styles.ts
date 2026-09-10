@@ -7,7 +7,7 @@
 export const THEME_VARS = `
   :host {
     --pl-green: #2e9e5b;
-    --pl-blue: #2f6fdb;
+    --pl-blue: #4f46e5; /* purple: promotional and clearly disclosed */
     --pl-amber: #c98a00;
     --pl-red: #d1433b;
     --pl-gray: #8f949a;
@@ -21,7 +21,7 @@ export const THEME_VARS = `
   }
   :host([data-theme="dark"]) {
     --pl-green: #4cc27a;
-    --pl-blue: #6aa1ff;
+    --pl-blue: #8b85ff;
     --pl-amber: #f2b233;
     --pl-red: #ef6b63;
     --pl-gray: #9aa0a6;
@@ -202,8 +202,6 @@ export const POPOVER_CSS = `
   a.cta { display: inline-block; margin: 2px 0 6px; padding: 7px 12px; border-radius: 6px; background: #4f46e5; color: #fff; font-weight: 600; font-size: 12px; text-decoration: none; }
   a.cta:hover { background: #4338ca; }
   a.cta:focus-visible { outline: 2px solid var(--pl-focus); outline-offset: 2px; }
-  :host([data-theme="dark"]) a.cta { background: #8b85ff; color: #111; }
-  :host([data-theme="dark"]) a.cta:hover { background: #a29dff; }
   .foot { color: var(--pl-muted); font-size: 11px; margin: 0; font-style: italic; }
   .card[data-state="green"] { --pl-color: var(--pl-green); }
   .card[data-state="blue"] { --pl-color: var(--pl-blue); }

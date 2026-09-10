@@ -40,9 +40,9 @@ PromoLens keeps four ideas separate on purpose:
 | **Confidence** | low / medium / high | How much independent, verifiable evidence was actually available. |
 | **Reach** | low / medium / high | How widely the post is seen (votes, comments, age). **Reach is never evidence of promotion.** |
 
-A post can be highly promotional *and* transparent. "I built this product, try it here" scores around 90% promotional with **clear** disclosure and **low** undisclosed-promotion risk (blue ring). The same pitch with no disclosure would be a red ring.
+A post can be highly promotional *and* transparent. "I built this product, try it here" scores around 90% promotional with **clear** disclosure and **low** undisclosed-promotion risk (purple ring). The same pitch with no disclosure would be a red ring.
 
-Ring states: gray dashed **?** = not analysed, click to analyse · gray (animated) = analysing · green = low likelihood · blue = promotional and clearly disclosed (informational, not a warning) · amber = uncertain middle score without a clear disclosure · red = high likelihood with missing/unclear disclosure · gray **-** = analysis unavailable (click to retry).
+Ring states: gray dashed **?** = not analysed, click to analyse · gray (animated) = analysing · green = low likelihood · purple = promotional and clearly disclosed (informational, not a warning) · amber = uncertain middle score without a clear disclosure · red = high likelihood with missing/unclear disclosure · gray **-** = analysis unavailable (click to retry).
 
 Why on-demand and post-page only? The strongest evidence (full body, comments, the author's replies) only exists on the post page; one click per post keeps model costs to cents; and nothing about your browsing is analysed or sent unless you explicitly ask for that one post.
 

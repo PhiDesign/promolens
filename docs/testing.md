@@ -85,7 +85,7 @@ Build (`npm run build`), load `apps/extension/dist` unpacked, then walk through:
 ### Popover contents
 - [ ] Shows, in this order: the verdict line (Looks organic / Transparent promotion / Promotion with an unclear connection / Possible undisclosed promotion), the "presented as..." technique line when promotional, percentage + label + confidence, disclosure line, up to three reasons, the source/estimate sentence - nothing else.
 - [ ] When history shows the author calling the product their own elsewhere but the post does not, the technique line starts with "Elsewhere the author describes this as their own product".
-- [ ] A clearly disclosed founder post shows a blue ring, "Transparent promotion", "Connection disclosed by author", and a high percentage.
+- [ ] A clearly disclosed founder post shows a purple ring, "Transparent promotion", "Connection disclosed by author", and a high percentage.
 - [ ] A 40-59 post without disclosure shows an amber ring; the same post at 60+ shows red.
 - [ ] A post with an undisclosed product link + call to action shows a red ring and "Connection not disclosed".
 

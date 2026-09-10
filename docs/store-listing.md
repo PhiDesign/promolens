@@ -48,7 +48,7 @@ PromoLens is an independent project and is not affiliated with, approved by, or 
 **Language:** English.
 
 **Screenshots** (1280x800 or 640x400, up to 5)
-1. A post page with the blue "Transparent promotion" card open.
+1. A post page with the purple "Transparent promotion" card open.
 2. A red "Possible undisclosed promotion" card with the technique line and a "source" link.
 3. A green "Looks organic" card.
 4. A feed with idle buttons on the cards and one scored ring.

@@ -28,7 +28,7 @@ export type RingState = "idle" | "analyzing" | "green" | "blue" | "amber" | "red
  * Ring colour rules:
  *  idle   - not analysed yet (gray outline; click to analyse)
  *  green  - low promotional likelihood
- *  blue   - promotional and clearly disclosed (informational, not a warning)
+ *  blue   - (shown purple) promotional and clearly disclosed (informational, not a warning)
  *  amber  - uncertain middle score without a clear disclosure: look closer
  *  red    - high promotional likelihood with missing/unclear disclosure
  */
