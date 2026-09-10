@@ -63,7 +63,7 @@ describe("worker: hosted tier on KV", () => {
     const res = await handle(req("GET", "/api/v1/health"), rt);
     expect(res.status).toBe(200);
     expect(res.headers.get("access-control-allow-origin")).toBe("chrome-extension://abc");
-    expect((await res.json()).provider).toBe("mock");
+    expect(((await res.json()) as { provider: string }).provider).toBe("mock");
   });
 
   it("answers preflight, and refuses it for a foreign origin", async () => {
@@ -75,7 +75,7 @@ describe("worker: hosted tier on KV", () => {
   it("meters analyses per install, persists to KV with an expiry, and walls at 402", async () => {
     const kv = fakeKv();
     const rt = makeRuntime(kv);
-    const q0 = await (await handle(req("GET", "/api/v1/quota"), rt)).json();
+    const q0 = (await (await handle(req("GET", "/api/v1/quota"), rt)).json()) as Record<string, unknown>;
     expect(q0).toMatchObject({ plan: "free", used: 0, limit: 2, licensed: false });
 
     const a1 = await handle(req("POST", "/api/v1/analyze", { post }), rt);
@@ -87,8 +87,8 @@ describe("worker: hosted tier on KV", () => {
     await handle(req("POST", "/api/v1/analyze", { post: { ...post, title: "Another" } }), rt);
     const a3 = await handle(req("POST", "/api/v1/analyze", { post: { ...post, title: "Third" } }), rt);
     expect(a3.status).toBe(402);
-    expect((await a3.json()).error.code).toBe("quota_exceeded");
-    const q = await (await handle(req("GET", "/api/v1/quota"), rt)).json();
+    expect(((await a3.json()) as { error: { code: string } }).error.code).toBe("quota_exceeded");
+    const q = (await (await handle(req("GET", "/api/v1/quota"), rt)).json()) as Record<string, unknown>;
     expect(q).toMatchObject({ used: 2, remaining: 0 });
   });
 
@@ -101,7 +101,7 @@ describe("worker: hosted tier on KV", () => {
     });
     const res = await handle(req("POST", "/api/v1/analyze", { post }), rt);
     expect(res.status).toBe(502);
-    const q = await (await handle(req("GET", "/api/v1/quota"), rt)).json();
+    const q = (await (await handle(req("GET", "/api/v1/quota"), rt)).json()) as Record<string, unknown>;
     expect(q.used).toBe(0);
   });
 
@@ -110,7 +110,7 @@ describe("worker: hosted tier on KV", () => {
     const rt = makeRuntime(kv);
     const bad = await handle(req("POST", "/api/v1/license", { licenseKey: "AAAAAAAA-BBBBBBBB-CCCCCCCC-EEEEEEEE" }), rt);
     expect(bad.status).toBe(402);
-    expect((await bad.json()).error.code).toBe("license_not_found");
+    expect(((await bad.json()) as { error: { code: string } }).error.code).toBe("license_not_found");
 
     const ok = await handle(req("POST", "/api/v1/license", { licenseKey: GOOD_KEY }), rt);
     expect(ok.status).toBe(200);
@@ -132,5 +132,25 @@ describe("worker: hosted tier on KV", () => {
     expect((await handle(badJson, rt)).status).toBe(400);
     const big = await handle(req("POST", "/api/v1/analyze", { post: { ...post, body: "x".repeat(500) } }), rt);
     expect(big.status).toBe(413);
+  });
+});
+
+describe("worker: upgrading starts with the full Plus allowance", () => {
+  it("free usage does not count against Plus, and a refund lands in the right bucket", async () => {
+    const kv = fakeKv();
+    const rt = makeRuntime(kv);
+    await handle(req("POST", "/api/v1/analyze", { post }), rt);
+    await handle(req("POST", "/api/v1/analyze", { post: { ...post, title: "Second" } }), rt);
+    expect((await (await handle(req("GET", "/api/v1/quota"), rt)).json()) as Record<string, unknown>).toMatchObject({ used: 2, remaining: 0 });
+
+    const up = (await (await handle(req("POST", "/api/v1/license", { licenseKey: GOOD_KEY }), rt)).json()) as Record<string, unknown>;
+    expect(up).toMatchObject({ plan: "plus", used: 0, limit: 100, remaining: 100 });
+
+    await handle(req("POST", "/api/v1/analyze", { post: { ...post, title: "Third" } }), rt);
+    expect((await (await handle(req("GET", "/api/v1/quota"), rt)).json()) as Record<string, unknown>).toMatchObject({ plan: "plus", used: 1 });
+
+    // Dropping the licence returns to the free counter, which is still exhausted.
+    await handle(req("DELETE", "/api/v1/license"), rt);
+    expect((await (await handle(req("GET", "/api/v1/quota"), rt)).json()) as Record<string, unknown>).toMatchObject({ plan: "free", used: 2, remaining: 0 });
   });
 });

@@ -30,7 +30,10 @@ export interface QuotaStatus {
 
 export interface InstallRecord {
   firstMonth: string;
+  /** Free-plan usage by month. */
   months: Record<string, number>;
+  /** Plus usage by month, counted separately so an upgrade starts with the full allowance. */
+  plusMonths?: Record<string, number>;
   licenseKey?: string;
   instanceId?: string;
 }
@@ -44,7 +47,7 @@ export interface LicenseBinding {
 export interface QuotaBackend {
   status(installId: string, plan: PlanName): QuotaStatus | Promise<QuotaStatus>;
   consume(installId: string, plan: PlanName): { allowed: boolean; status: QuotaStatus } | Promise<{ allowed: boolean; status: QuotaStatus }>;
-  refund(installId: string, month: string): void | Promise<void>;
+  refund(installId: string, month: string, plan: PlanName): void | Promise<void>;
   attachLicense(installId: string, licenseKey: string, instanceId?: string): void | Promise<void>;
   detachLicense(installId: string): void | Promise<void>;
   license(installId: string): LicenseBinding | Promise<LicenseBinding>;
@@ -67,9 +70,15 @@ export function limitFor(limits: PlanLimits, r: InstallRecord, plan: PlanName, m
   return month === r.firstMonth ? limits.freeInitial : limits.freeMonthly;
 }
 
+function bucket(r: InstallRecord, plan: PlanName): Record<string, number> {
+  if (plan === "free") return r.months;
+  if (!r.plusMonths) r.plusMonths = {};
+  return r.plusMonths;
+}
+
 export function statusOf(limits: PlanLimits, r: InstallRecord, plan: PlanName, now: Date): QuotaStatus {
   const month = monthKey(now);
-  const used = r.months[month] ?? 0;
+  const used = bucket(r, plan)[month] ?? 0;
   const limit = limitFor(limits, r, plan, month);
   return { plan, used, limit, remaining: Math.max(0, limit - used), resetsAt: nextMonthStart(now), month };
 }
@@ -78,16 +87,18 @@ export function statusOf(limits: PlanLimits, r: InstallRecord, plan: PlanName, n
 export function consumeRecord(limits: PlanLimits, r: InstallRecord, plan: PlanName, now: Date): { allowed: boolean; status: QuotaStatus } {
   const before = statusOf(limits, r, plan, now);
   if (before.remaining <= 0) return { allowed: false, status: before };
-  r.months[before.month] = (r.months[before.month] ?? 0) + 1;
+  const b = bucket(r, plan);
+  b[before.month] = (b[before.month] ?? 0) + 1;
   // Keep the record small: drop months older than the previous one.
-  for (const m of Object.keys(r.months)) if (m < before.month && m !== r.firstMonth) delete r.months[m];
+  for (const m of Object.keys(b)) if (m < before.month && m !== r.firstMonth) delete b[m];
   return { allowed: true, status: statusOf(limits, r, plan, now) };
 }
 
 /** Give one back (the analysis failed on our side). Returns whether anything changed. */
-export function refundRecord(r: InstallRecord, month: string): boolean {
-  if (!r.months[month]) return false;
-  r.months[month] = Math.max(0, r.months[month]! - 1);
+export function refundRecord(r: InstallRecord, month: string, plan: PlanName): boolean {
+  const b = bucket(r, plan);
+  if (!b[month]) return false;
+  b[month] = Math.max(0, b[month]! - 1);
   return true;
 }
 
@@ -95,7 +106,7 @@ export function refundRecord(r: InstallRecord, month: string): boolean {
 export function isIdle(r: InstallRecord, now: Date): boolean {
   if (r.licenseKey) return false;
   const keep = new Set([monthKey(now), monthKey(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1)))]);
-  return !(Object.keys(r.months).some((m) => keep.has(m)) || keep.has(r.firstMonth));
+  return !(Object.keys(r.months).some((m) => keep.has(m)) || Object.keys(r.plusMonths ?? {}).some((m) => keep.has(m)) || keep.has(r.firstMonth));
 }
 
 /** Anonymous install ids are UUIDs; reject anything else so the store cannot be polluted. */

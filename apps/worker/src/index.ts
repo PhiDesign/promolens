@@ -175,7 +175,7 @@ export async function handle(request: Request, rt: Runtime): Promise<Response> {
         status = 200;
         return respond(200, body, extra);
       } catch (err) {
-        await rt.hosted.quota.refund(installId, attempt.status.month);
+        await rt.hosted.quota.refund(installId, attempt.status.month, plan);
         if (err instanceof HttpError) {
           status = err.status;
           return respond(err.status, errorBody(err), extra);

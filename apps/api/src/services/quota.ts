@@ -105,9 +105,9 @@ export class QuotaStore implements QuotaBackend {
   }
 
   /** Give one back (the analysis failed on our side). */
-  refund(installId: string, month: string): void {
+  refund(installId: string, month: string, plan: PlanName): void {
     const r = this.data.installs[installId];
-    if (r && refundRecord(r, month)) this.scheduleFlush();
+    if (r && refundRecord(r, month, plan)) this.scheduleFlush();
   }
 
   /** Remember which licence an install activated (so the key need not be sent every time). */

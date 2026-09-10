@@ -101,7 +101,7 @@ export function createApp(config: ApiConfig, deps: AppDeps = {}): Server {
           try {
             await handleAnalyze(req, res, { service, maxBodyBytes: config.maxBodyBytes });
           } catch (err) {
-            quotaDeps.quota.refund(installId, attempt.status.month);
+            quotaDeps.quota.refund(installId, attempt.status.month, plan);
             throw err;
           }
           return;

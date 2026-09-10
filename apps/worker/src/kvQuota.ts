@@ -43,7 +43,7 @@ export class KvQuotaStore implements QuotaBackend {
   private async read(installId: string): Promise<InstallRecord | undefined> {
     const v = (await this.kv.get(this.key(installId), "json")) as Partial<InstallRecord> | null;
     if (!v || typeof v.firstMonth !== "string" || typeof v.months !== "object" || v.months === null) return undefined;
-    return { firstMonth: v.firstMonth, months: v.months, licenseKey: v.licenseKey, instanceId: v.instanceId };
+    return { firstMonth: v.firstMonth, months: v.months, plusMonths: v.plusMonths, licenseKey: v.licenseKey, instanceId: v.instanceId };
   }
 
   private async write(installId: string, r: InstallRecord): Promise<void> {
@@ -70,9 +70,9 @@ export class KvQuotaStore implements QuotaBackend {
     return result;
   }
 
-  async refund(installId: string, month: string): Promise<void> {
+  async refund(installId: string, month: string, plan: PlanName): Promise<void> {
     const r = await this.read(installId);
-    if (r && refundRecord(r, month)) await this.write(installId, r);
+    if (r && refundRecord(r, month, plan)) await this.write(installId, r);
   }
 
   async attachLicense(installId: string, licenseKey: string, instanceId?: string): Promise<void> {
