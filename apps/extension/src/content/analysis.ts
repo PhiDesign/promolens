@@ -159,7 +159,7 @@ async function runPipeline(record: PostRecord, settings: Settings, token: Cancel
 export function quotaNoticeLines(): MessageLine[] {
   return [
     `You have used this month's free analyses. PromoLens Plus gives ${PLUS_MONTHLY_ANALYSES} a month for ${PLUS_PRICE_LABEL}.`,
-    { text: "Upgrade to PromoLens Plus", href: PLUS_CHECKOUT_URL },
+    { text: `Upgrade to Plus - ${PLUS_PRICE_LABEL}`, href: PLUS_CHECKOUT_URL, button: true },
     "Or open the PromoLens toolbar popup and add your own OpenAI API key (unlimited, billed by OpenAI).",
   ];
 }

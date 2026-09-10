@@ -204,7 +204,7 @@ export class PopoverController {
       }
       const p = el(this.doc, "p", "meta");
       const a = this.doc.createElement("a");
-      a.className = "source";
+      a.className = line.button ? "cta" : "src";
       a.href = line.href;
       a.target = "_blank";
       a.rel = "noopener noreferrer";
@@ -233,7 +233,7 @@ export class PopoverController {
 }
 
 /** A message-card line: plain text, or a link. */
-export type MessageLine = string | { text: string; href: string };
+export type MessageLine = string | { text: string; href: string; button?: boolean };
 
 function el(doc: Document, tag: string, className: string, text?: string): HTMLElement {
   const node = doc.createElement(tag);
