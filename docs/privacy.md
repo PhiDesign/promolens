@@ -1,15 +1,15 @@
 # PromoLens privacy policy
 
-Version 0.2, 8 September 2026. Published at <https://phidesign.github.io/promolens/privacy>. This policy will be updated before any change to what is collected, before any hosted service is introduced, and before any paid option exists.
+Version 0.3, 10 September 2026. Published at <https://phidesign.github.io/promolens/privacy>. This policy will be updated before any change to what is collected.
 
-**In one sentence:** PromoLens reads only the Reddit post you click on (and, if enabled, that author's public posts), analyses it in your browser, and sends nothing anywhere unless you deliberately switch on the optional developer feature that talks to an API you run yourself.
+**In one sentence:** PromoLens reads only the Reddit post you click on (and, if enabled, that author's public posts); with deeper analysis on, that one post is sent to the PromoLens service (or, if you choose, to OpenAI with your own key) identified only by an anonymous install id, and nothing else leaves your browser.
 
 ## Summary
 
 - PromoLens does **nothing until you click its button** on a post - on the post page or on a feed card. Feeds are never scanned or scored on their own.
 - With deeper analysis on (the default when the hosted service is available), the post you clicked is sent to the PromoLens service and on to a language-model provider, identified only by an anonymous install id; see "Included analyses" below. You can instead use your own OpenAI key, or switch deeper analysis off.
-- Analysis runs **in your browser** by default, on information already visible on that post page.
-- Nothing leaves your browser unless you switch on **Deeper analysis** in the popup, and then only the post you clicked goes to the server address you configured (by default `http://127.0.0.1:8787`, i.e. your own computer), and from there to the model provider you configured.
+- The rule-based analysis always runs **in your browser**, on information already visible on that post page. With deeper analysis off, nothing leaves your browser.
+- Only the post you clicked is ever sent, and only to the option you selected: the PromoLens service, OpenAI with your own key, or (developers) a server you run yourself.
 - There are **no accounts, no analytics, no telemetry, no advertising, and no data selling**.
 - PromoLens does **not train models** on Reddit content.
 
@@ -37,13 +37,13 @@ Additionally:
 - your browsing history, cookies, or other websites
 - any page you are not currently viewing, except the one case below: the *public* profile listing of the author of a post you clicked "analyse" on, when the history check is on (nothing is crawled or fetched in the background, and never for posts you did not click)
 
-The extension requests the `storage` permission and host access to `https://www.reddit.com/*` (needed for the author-history request); it runs only on `https://www.reddit.com/*`.
+The extension requests the `storage` permission and host access to `https://www.reddit.com/*` (needed for the author-history request) and `https://promolens.onrender.com/*` (the PromoLens service); it runs only on `https://www.reddit.com/*`. Access to `https://api.openai.com/*` is optional and requested only when you save your own key.
 
 ## Does information leave the browser?
 
-**Deeper analysis off (default):** no. Analysis runs in the page when you click. Results are cached inside Chrome's extension storage on your device.
+**Deeper analysis off:** no. Analysis runs in the page when you click. Results are cached inside Chrome's extension storage on your device.
 
-**Deeper analysis on:** when you click the button, the background worker sends the fields listed above for that one post, plus the locally detected signals and a content hash, to the configured API URL over HTTP. The bundled API is designed to run on your own machine. If you point it at another machine, the same data goes there - only do that with a server you control and trust.
+**Deeper analysis on (the default):** when you click the button, the background worker sends the fields listed above for that one post, plus the locally detected signals and a content hash, to the option you selected: *Included analyses* (the PromoLens service, see below), *Use my own OpenAI API key* (directly to OpenAI), or a local API server you run (developers). Nothing is sent for posts you do not click.
 
 ## Included analyses and PromoLens Plus (hosted service)
 
@@ -91,9 +91,9 @@ Clicking the button on a feed card fetches that one post's public content (title
 
 There is no automatic scanning. To remove the button entirely, click the PromoLens toolbar icon and switch off **Show PromoLens on post pages**. To stop any data leaving the browser, switch off **Deeper analysis**. You can also disable or remove the extension from `chrome://extensions`.
 
-## Requesting deletion if server-side storage is introduced later
+## Requesting deletion
 
-Today nothing is stored server-side beyond the in-memory cache of a server you run yourself. If a hosted service with persistent storage is ever introduced, this document will be updated with: what is stored, for how long, the lawful basis, and a deletion request channel (planned: an email address and an in-extension "delete my data" action keyed by an anonymous installation identifier). No hosted service exists in this milestone.
+The PromoLens service stores, per anonymous install id: the monthly analysis count and, for Plus, the licence key you activated. Nothing else, and no post text. To delete it: remove the licence in the popup (this deletes the binding immediately) and uninstall the extension; the counter for an install id that has not been seen for two months is deleted automatically. You can also ask for immediate deletion by opening an issue at <https://github.com/PhiDesign/promolens/issues>; reinstalling the extension creates a new install id, and the old one is deleted after two months of inactivity.
 
 ## Safety boundaries that protect other people
 

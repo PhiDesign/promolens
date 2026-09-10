@@ -12,7 +12,7 @@ PromoLens never analyses anything on its own. A small gray **?** button sits in 
 
 1. **Author history** (on by default): the author's recent *public* posts and comments are read - the same pages you could open yourself - to see whether the same product keeps coming back, whether a near-identical post was published elsewhere, and whether the author has said "my app" / "I'm the founder" somewhere else.
 2. **Rule engine**: scores the post plus that history in the browser, in milliseconds.
-3. **Deeper analysis, if enabled**: the post and the history summary go to the local API you run, where a language model adds quoted evidence - including its own observations outside the named criteria, capped so they can never dominate - and the rule engine produces the final number. With deeper analysis on, the ring shows one result, not a preliminary score that later changes.
+3. **Deeper analysis (on by default)**: the post and the history summary go to the PromoLens service, to OpenAI with your own key, or to a local API you run, where a language model adds quoted evidence - including its own observations outside the named criteria, capped so they can never dominate - and the rule engine produces the final number. With deeper analysis on, the ring shows one result, not a preliminary score that later changes.
 
 Hover, focus, or click the ring to see a compact evidence card:
 
@@ -138,7 +138,7 @@ See [docs/architecture.md](docs/architecture.md) for details and the exact rules
 
 ### Optional: deeper analysis with a language model
 
-The simplest way, no server needed: open the popup, switch on **Deeper analysis**, choose **Use my own OpenAI API key**, paste a key from platform.openai.com/api-keys and click **Save and test key**. Chrome asks once for permission to contact api.openai.com. From then on each click also sends that post to the model, which adds quoted evidence; the rule engine still computes the score. Cost is billed to your OpenAI account - roughly half a cent per post with `gpt-5-mini`.
+Out of the box, **Deeper analysis** is on and uses **Included analyses** through the hosted PromoLens service: 20 analyses to start, then 5 a month, or 500 a month with PromoLens Plus ($4.99/month). For unlimited use with no subscription, choose **Use my own OpenAI API key** in the popup, paste a key from platform.openai.com/api-keys and click **Save and test key**. Chrome asks once for permission to contact api.openai.com. From then on each click also sends that post to the model, which adds quoted evidence; the rule engine still computes the score. Cost is billed to your OpenAI account - roughly half a cent per post with `gpt-5-mini`.
 
 Developers who want to run the model behind their own API (for the evaluation harness, other providers, or a shared server) can use the local API instead:
 
