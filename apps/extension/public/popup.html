@@ -154,7 +154,7 @@
         <span>Show PromoLens on post pages</span>
         <input type="checkbox" role="switch" id="enabled" />
       </label>
-      <p class="hint">Adds one small button in the header of an opened post. Click it to analyse that post. Nothing is analysed until you click.</p>
+      <p class="hint">A small button in the post header. Nothing runs until you click it.</p>
     </section>
 
     <section>
@@ -162,7 +162,7 @@
         <span>Also show it on feed cards</span>
         <input type="checkbox" role="switch" id="feedEnabled" />
       </label>
-      <p class="hint">Clicking the button on a feed card fetches that post in the background (body, links, top comments) and scores it, so you can decide whether to open it. One post per click, never automatically.</p>
+      <p class="hint">Score a post from the feed without opening it. One post per click.</p>
     </section>
 
     <section id="redditSection" hidden>
@@ -170,7 +170,7 @@
         <span>Use the official Reddit API</span>
         <input type="checkbox" role="switch" id="dataApiEnabled" />
       </label>
-      <p class="hint">Log in with your Reddit account so posts and profiles are read through Reddit's Data API (read-only) instead of the page session. Nothing is posted or changed on your account.</p>
+      <p class="hint">Read posts and profiles through Reddit's API (read-only) instead of the page.</p>
       <button id="redditLogin" type="button">Log in with Reddit</button>
       <button id="redditLogout" type="button" hidden>Log out</button>
       <div class="status" id="redditStatus" role="status" aria-live="polite"></div>
@@ -181,7 +181,7 @@
         <span>Check the author's public history</span>
         <input type="checkbox" role="switch" id="historyEnabled" />
       </label>
-      <p class="hint">When you click the button, PromoLens also reads the author's recent public posts and comments (the same pages you could open yourself) to see whether the same product recurs. Kept in memory only, for up to 6 hours per author; never saved to disk.</p>
+      <p class="hint">Also looks at the author's recent public posts to see if the same product keeps coming back. Kept in memory only.</p>
     </section>
 
     <section>
@@ -189,7 +189,7 @@
         <span>Deeper analysis (language model)</span>
         <input type="checkbox" role="switch" id="apiEnabled" />
       </label>
-      <p class="hint">Optional. When you click the button, the post's text, comments and the author's history summary are also sent to a language model, which adds quoted evidence. The rule engine still computes the score. Off by default.</p>
+      <p class="hint">A language model reviews the post, comments and history and adds quoted evidence. The score is still computed by the rules.</p>
 
       <div id="aiOptions" hidden>
         <label class="row sub" id="providerHostedRow" hidden>
@@ -221,7 +221,7 @@
             <option value="gpt-4.1">gpt-4.1</option>
           </select>
           <button id="saveOwnKey" type="button">Save and test key</button>
-          <p class="hint">Stored only in this extension on this device and sent only to OpenAI. Usage is billed to your OpenAI account - roughly half a cent per post with gpt-5-mini. Create a key at platform.openai.com/api-keys.</p>
+          <p class="hint">Stays on this device; billed to your OpenAI account (about half a cent per post). Get a key at platform.openai.com/api-keys.</p>
         </div>
 
         <!-- Developer option: hidden from the popup. Set aiProvider to "local-api" in
