@@ -7,9 +7,7 @@ export type AiProvider = "hosted" | "own-key" | "local-api";
 export interface Settings {
   /** Show the PromoLens button on post pages. */
   enabled: boolean;
-  /** Deeper analysis with a language model (any provider). Off by default. */
-  apiEnabled: boolean;
-  /** Where the model runs: the user's own OpenAI key from the worker, or a local API server (developers). */
+  /** Every click runs the rules plus a language model. Where the model runs: PromoLens's included analyses, the user's own OpenAI key, or a local API server (developers). */
   aiProvider: AiProvider;
   /** Own-key mode: stored only in this extension's storage on this device; sent only to the provider. */
   ownKey: string;
@@ -20,8 +18,6 @@ export interface Settings {
   apiBaseUrl: string;
   /** Cached results older than this are ignored. */
   cacheTtlHours: number;
-  /** On click, also read the author's public posting history (same site, your own session). */
-  historyEnabled: boolean;
   /** Also show the button on feed cards; a click fetches the post in the background and scores it. */
   feedEnabled: boolean;
   /** When logged in with Reddit, read posts and profiles through the official Data API instead of the page session. */
@@ -34,16 +30,12 @@ import { isHostedConfigured } from "./hostedApp.js";
 
 export const DEFAULT_SETTINGS: Settings = {
   enabled: true,
-  // With a hosted service available, deeper analysis is on from the first click
-  // (free allowance). Without one, the user has to add a key first.
-  apiEnabled: isHostedConfigured(),
   aiProvider: isHostedConfigured() ? "hosted" : "own-key",
   ownKey: "",
   ownModel: "gpt-5-mini",
   licenseKey: "",
   apiBaseUrl: "http://127.0.0.1:8787",
   cacheTtlHours: 24,
-  historyEnabled: true,
   feedEnabled: true,
   dataApiEnabled: true,
 };
@@ -58,7 +50,6 @@ function sanitize(raw: unknown): Settings {
   const ownModel = typeof r.ownModel === "string" && /^[A-Za-z0-9._-]{2,64}$/.test(r.ownModel.trim()) ? r.ownModel.trim() : DEFAULT_SETTINGS.ownModel;
   return {
     enabled: typeof r.enabled === "boolean" ? r.enabled : DEFAULT_SETTINGS.enabled,
-    apiEnabled: typeof r.apiEnabled === "boolean" ? r.apiEnabled : DEFAULT_SETTINGS.apiEnabled,
     aiProvider:
       r.aiProvider === "local-api" ? "local-api" : r.aiProvider === "hosted" && isHostedConfigured() ? "hosted" : r.aiProvider === "own-key" ? "own-key" : DEFAULT_SETTINGS.aiProvider,
     ownKey,
@@ -66,7 +57,6 @@ function sanitize(raw: unknown): Settings {
     licenseKey: typeof r.licenseKey === "string" ? r.licenseKey.trim().slice(0, 80) : "",
     apiBaseUrl: url,
     cacheTtlHours: ttl,
-    historyEnabled: typeof r.historyEnabled === "boolean" ? r.historyEnabled : DEFAULT_SETTINGS.historyEnabled,
     feedEnabled: typeof r.feedEnabled === "boolean" ? r.feedEnabled : DEFAULT_SETTINGS.feedEnabled,
     dataApiEnabled: typeof r.dataApiEnabled === "boolean" ? r.dataApiEnabled : DEFAULT_SETTINGS.dataApiEnabled,
   };

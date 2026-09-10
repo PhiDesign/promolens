@@ -22,9 +22,7 @@ async function send<T>(message: Message): Promise<T | undefined> {
 
 async function init(): Promise<void> {
   const enabled = $<HTMLInputElement>("enabled");
-  const historyEnabled = $<HTMLInputElement>("historyEnabled");
   const feedEnabled = $<HTMLInputElement>("feedEnabled");
-  const apiEnabled = $<HTMLInputElement>("apiEnabled");
   const apiBaseUrl = $<HTMLInputElement>("apiBaseUrl");
   const checkApi = $<HTMLButtonElement>("checkApi");
   const apiStatus = $<HTMLDivElement>("apiStatus");
@@ -36,15 +34,11 @@ async function init(): Promise<void> {
 
   const settings = await loadSettings();
   enabled.checked = settings.enabled;
-  historyEnabled.checked = settings.historyEnabled;
   feedEnabled.checked = settings.feedEnabled;
-  apiEnabled.checked = settings.apiEnabled;
   apiBaseUrl.value = settings.apiBaseUrl;
 
   enabled.addEventListener("change", () => void saveSettings({ enabled: enabled.checked }));
-  historyEnabled.addEventListener("change", () => void saveSettings({ historyEnabled: historyEnabled.checked }));
   feedEnabled.addEventListener("change", () => void saveSettings({ feedEnabled: feedEnabled.checked }));
-  apiEnabled.addEventListener("change", () => void saveSettings({ apiEnabled: apiEnabled.checked }));
   apiBaseUrl.addEventListener("change", async () => {
     const saved = await saveSettings({ apiBaseUrl: apiBaseUrl.value.trim() });
     apiBaseUrl.value = saved.apiBaseUrl;
@@ -60,7 +54,6 @@ async function init(): Promise<void> {
 
   // Deeper analysis: provider choice, own key, and a "save and test" that asks
   // for the api.openai.com permission in the same click (a user gesture).
-  const aiOptions = $<HTMLElement>("aiOptions");
   const providerOwnKey = $<HTMLInputElement>("providerOwnKey");
   const providerLocalApi = $<HTMLInputElement>("providerLocalApi");
   const ownKeyFields = $<HTMLElement>("ownKeyFields");
@@ -107,8 +100,7 @@ async function init(): Promise<void> {
   };
 
   const selectedProvider = () => (providerHosted.checked ? "hosted" : providerLocalApi.checked ? "local-api" : "own-key");
-  const renderAi = (s: { apiEnabled: boolean; aiProvider: string; ownKey: string; ownModel: string }) => {
-    aiOptions.hidden = !s.apiEnabled;
+  const renderAi = (s: { aiProvider: string; ownKey: string; ownModel: string }) => {
     providerHosted.checked = s.aiProvider === "hosted";
     providerOwnKey.checked = s.aiProvider === "own-key";
     providerLocalApi.checked = s.aiProvider === "local-api";
@@ -123,16 +115,12 @@ async function init(): Promise<void> {
     (providerLocalApi.closest("label") as HTMLElement | null)!.hidden = s.aiProvider !== "local-api";
     ownModel.value = s.ownModel;
     if (s.ownKey && !ownKey.value) ownKey.placeholder = `saved key ending …${s.ownKey.slice(-4)}`;
-    if (hosted && s.apiEnabled && s.aiProvider === "hosted") {
+    if (hosted && s.aiProvider === "hosted") {
       renderQuota(undefined);
       void send<QuotaResponse>({ type: "QUOTA_GET" }).then(renderQuota);
     }
   };
   renderAi(settings);
-  apiEnabled.addEventListener("change", async () => {
-    const saved = await saveSettings({ apiEnabled: apiEnabled.checked });
-    renderAi(saved);
-  });
   for (const radio of [providerHosted, providerOwnKey, providerLocalApi]) {
     radio.addEventListener("change", async () => {
       const saved = await saveSettings({ aiProvider: selectedProvider() });
@@ -183,7 +171,7 @@ async function init(): Promise<void> {
         apiStatus.textContent = "PromoLens needs permission to contact api.openai.com to use your key.";
         return;
       }
-      await saveSettings({ ownKey: key, ownModel: ownModel.value, aiProvider: "own-key", apiEnabled: true });
+      await saveSettings({ ownKey: key, ownModel: ownModel.value, aiProvider: "own-key" });
       ownKey.value = "";
       ownKey.placeholder = `saved key ending …${key.slice(-4)}`;
     }

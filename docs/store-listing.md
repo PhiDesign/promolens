@@ -31,13 +31,13 @@ Nothing happens on its own. A small button appears in the header of posts. Click
 - a promotional-likelihood estimate (0-100), the disclosure status and a confidence level
 - up to three reasons, quoted from the post, with links to the source when the evidence comes from elsewhere
 
-Optionally, PromoLens also reads the author's recent public posts and comments (the same pages you could open yourself) to see whether the same product keeps coming back, and it can score a post straight from the feed without opening it. Both are one click, one post, never automatic, and can be switched off.
+PromoLens also reads the author's recent public posts and comments (the same pages you could open yourself) to see whether the same product keeps coming back, and it can score a post straight from the feed without opening it. Both are one click, one post, never automatic.
 
 Deeper analysis is included: a language model reviews the post, the comments and the author's history, adding quoted evidence and catching what pattern rules miss. The rule engine still computes every score, so results stay explainable. You get 20 analyses to start and 5 a month after that, with no account. PromoLens Plus ($4.99/month) raises that to 500 a month. Prefer to pay OpenAI directly? Paste your own OpenAI API key instead: it stays on your device, usage is billed to your OpenAI account, and there is no limit.
 
 What it is not: PromoLens never labels people, never reports or hides anything, and never acts on your account. Every result is an estimate based on observable signals and can be wrong. Transparent promotion is treated as fine.
 
-Privacy: the rule-based analysis runs in your browser. With deeper analysis on, only the post you clicked is sent to the PromoLens service (or to OpenAI with your own key), identified by an anonymous install id; nothing is sent for posts you do not click, and the service stores no post text. Results are cached on your device for 24 hours and can be cleared with one click. No accounts, no analytics, no data sold, no model training. Full policy: https://phidesign.github.io/promolens/privacy
+Privacy: only the post you clicked is sent to the PromoLens service (or to OpenAI with your own key), identified by an anonymous install id; nothing is sent for posts you do not click, and the service stores no post text. Results are cached on your device for 24 hours and can be cleared with one click. No accounts, no analytics, no data sold, no model training. Full policy: https://phidesign.github.io/promolens/privacy
 
 Open source (MIT): https://github.com/PhiDesign/promolens
 
@@ -75,7 +75,7 @@ Estimate, on the user's request, whether the Reddit post they are looking at is 
   ```
 - Host permission `https://promolens-api.amaturos.workers.dev/*`:
   ```
-  The PromoLens service that provides the included deeper analyses and PromoLens Plus. When the user clicks the button with deeper analysis on, the extension sends that one post to this service, which forwards it to a language model and returns quoted evidence. Also used to show how many analyses are left and to activate a licence key. Requests carry only an anonymous install id; no post text is stored.
+  The PromoLens service that provides the included deeper analyses and PromoLens Plus. When the user clicks the button, the extension sends that one post to this service, which forwards it to a language model and returns quoted evidence. Also used to show how many analyses are left and to activate a licence key. Requests carry only an anonymous install id; no post text is stored.
   ```
 - Optional host permission `https://api.openai.com/*` (requested at runtime, only if the user saves their own key):
   ```
@@ -85,7 +85,7 @@ Estimate, on the user's request, whether the Reddit post they are looking at is 
 
 **Data usage** (tick the boxes that apply)
 
-- Collects: *Website content* (the Reddit post and comments the user chose to analyse) - processed locally and, with deeper analysis on (default), sent for that one post to the PromoLens service or, if the user chooses, to OpenAI with their own key; never stored. *Personally identifiable information*: No (an anonymous random install id is the only identifier). *Authentication information*: No. *Location*: No. *Web history*: No. *User activity*: No. *Financial and payment information*: No (payments are handled entirely by Lemon Squeezy; the extension only receives a licence key).
+- Collects: *Website content* (the Reddit post and comments the user chose to analyse) - processed locally and sent for that one post to the PromoLens service or, if the user chooses, to OpenAI with their own key; never stored. *Personally identifiable information*: No (an anonymous random install id is the only identifier). *Authentication information*: No. *Location*: No. *Web history*: No. *User activity*: No. *Financial and payment information*: No (payments are handled entirely by Lemon Squeezy; the extension only receives a licence key).
 - Certifications (all true): not sold to third parties; not used for purposes unrelated to the single purpose; not used to determine creditworthiness or for lending.
 
 **Privacy policy URL**

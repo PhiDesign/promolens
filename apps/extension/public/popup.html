@@ -177,21 +177,10 @@
     </section>
 
     <section>
-      <label class="row">
-        <span>Check the author's public history</span>
-        <input type="checkbox" role="switch" id="historyEnabled" />
-      </label>
-      <p class="hint">Also looks at the author's recent public posts to see if the same product keeps coming back. Kept in memory only.</p>
-    </section>
+      <div class="row"><span>Analysis</span></div>
+      <p class="hint">Each click runs PromoLens's rules plus a language model on that post, its comments and the author's recent public posts. Choose where the model runs:</p>
 
-    <section>
-      <label class="row">
-        <span>Deeper analysis (language model)</span>
-        <input type="checkbox" role="switch" id="apiEnabled" />
-      </label>
-      <p class="hint">A language model reviews the post, comments and history and adds quoted evidence. The score is still computed by the rules.</p>
-
-      <div id="aiOptions" hidden>
+      <div id="aiOptions">
         <label class="row sub" id="providerHostedRow" hidden>
           <span>Included analyses</span>
           <input type="radio" name="aiProvider" id="providerHosted" value="hosted" />

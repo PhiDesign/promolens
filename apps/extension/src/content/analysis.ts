@@ -79,7 +79,7 @@ async function runPipeline(record: PostRecord, settings: Settings, token: Cancel
   }
 
   // 1. The author's public posting history (only because the user clicked).
-  if (settings.historyEnabled && post.author) {
+  if (post.author) {
     const history = await send<HistoryResponse>({ type: "HISTORY_GET", author: post.author });
     if (token.cancelled || !record.el.isConnected) return;
     if (history?.ok) {
@@ -89,8 +89,6 @@ async function runPipeline(record: PostRecord, settings: Settings, token: Cancel
       post.authorHistory = unavailableHistory(post.author, history ? history.reason : "no response");
       debug("history unavailable", record.key, post.authorHistory.reason);
     }
-  } else if (post.author) {
-    post.authorHistory = unavailableHistory(post.author, "disabled");
   }
 
   const hash = hashPostContent(post);
@@ -98,7 +96,7 @@ async function runPipeline(record: PostRecord, settings: Settings, token: Cancel
 
   // 2. Same content already analysed on this page?
   const known = pageCache.get(hash);
-  if (known && (known.source === "api" || !settings.apiEnabled)) {
+  if (known && known.source === "api") {
     finish(record, known, token);
     return;
   }
@@ -117,25 +115,21 @@ async function runPipeline(record: PostRecord, settings: Settings, token: Cancel
   if (token.cancelled || !record.el.isConnected) return;
   pageCache.set(hash, result);
   debug("local result", record.key, result.promoLikelihood, result.disclosure, result.confidence, `${Math.round(performance.now() - started)}ms`);
-  // Without deeper analysis this is the final answer. With it, keep the ring
-  // in the analysing state so the user sees a single number.
-  if (!settings.apiEnabled) {
-    record.ring.setResult(result);
-    record.status = "done";
-  }
+  // The ring stays in the analysing state until the model has answered, so
+  // the user sees a single number rather than a rules-only score that changes.
 
   // 4. Persistent cache (24h by default) - may hold an API-enriched result.
   const cached = await send<CacheGetResponse>({ type: "CACHE_GET", hash });
   debug("cache lookup", record.key, cached ? (cached.result ? "hit" : "miss") : "no response", `${Math.round(performance.now() - started)}ms`);
   if (token.cancelled || !record.el.isConnected) return;
-  if (cached?.result && (cached.result.source === "api" || !settings.apiEnabled)) {
+  if (cached?.result && cached.result.source === "api") {
     pageCache.set(hash, cached.result);
     finish(record, cached.result, token);
     return;
   }
 
-  // 5. Deeper analysis through the local API (language-model witness).
-  if (settings.apiEnabled) {
+  // 5. The language model (included analyses, own key, or a local API).
+  {
     const enriched = await send<EnrichResponse>({ type: "ENRICH", hash, post, localSignals: result.signals });
     debug("enrich", record.key, enriched ? (enriched.ok ? "ok" : enriched.reason) : "no response", `${Math.round(performance.now() - started)}ms`);
     if (token.cancelled || !record.el.isConnected) return;

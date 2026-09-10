@@ -13,8 +13,8 @@ export const OPENAI_ORIGIN = "https://api.openai.com/*";
 const OWN_KEY_TIMEOUT_MS = 50_000;
 
 /** True when own-key mode is selected and a key is present. */
-export function ownKeyReady(settings: Pick<Settings, "apiEnabled" | "aiProvider" | "ownKey">): boolean {
-  return settings.apiEnabled && settings.aiProvider === "own-key" && settings.ownKey.trim().length > 0;
+export function ownKeyReady(settings: Pick<Settings, "aiProvider" | "ownKey">): boolean {
+  return settings.aiProvider === "own-key" && settings.ownKey.trim().length > 0;
 }
 
 function client(settings: Pick<Settings, "ownKey" | "ownModel">, fetchFn?: typeof fetch): OpenAiChatClient {

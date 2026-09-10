@@ -2,13 +2,13 @@
 
 Version 0.3, 10 September 2026. Published at <https://phidesign.github.io/promolens/privacy>. This policy will be updated before any change to what is collected.
 
-**In one sentence:** PromoLens reads only the Reddit post you click on (and, if enabled, that author's public posts); with deeper analysis on, that one post is sent to the PromoLens service (or, if you choose, to OpenAI with your own key) identified only by an anonymous install id, and nothing else leaves your browser.
+**In one sentence:** PromoLens reads only the Reddit post you click on (and that author's public posts); that one post is sent to the PromoLens service (or, if you choose, to OpenAI with your own key) identified only by an anonymous install id, and nothing else leaves your browser.
 
 ## Summary
 
 - PromoLens does **nothing until you click its button** on a post - on the post page or on a feed card. Feeds are never scanned or scored on their own.
-- With deeper analysis on (the default when the hosted service is available), the post you clicked is sent to the PromoLens service and on to a language-model provider, identified only by an anonymous install id; see "Included analyses" below. You can instead use your own OpenAI key, or switch deeper analysis off.
-- The rule-based analysis always runs **in your browser**, on information already visible on that post page. With deeper analysis off, nothing leaves your browser.
+- Every click runs PromoLens's rules in your browser **and** sends that one post to a language model: through the PromoLens service (identified only by an anonymous install id; see "Included analyses" below), or directly to OpenAI with your own key if you choose that.
+- Nothing is sent for posts you do not click. If the model cannot be reached, the rules-only result is shown with a note saying so.
 - Only the post you clicked is ever sent, and only to the option you selected: the PromoLens service, OpenAI with your own key, or (developers) a server you run yourself.
 - There are **no accounts, no analytics, no telemetry, no advertising, and no data selling**.
 - PromoLens does **not train models** on Reddit content.
@@ -35,15 +35,15 @@ Additionally:
 - private messages, chats, or notifications
 - anything behind a login that is not already rendered on the page
 - your browsing history, cookies, or other websites
-- any page you are not currently viewing, except the one case below: the *public* profile listing of the author of a post you clicked "analyse" on, when the history check is on (nothing is crawled or fetched in the background, and never for posts you did not click)
+- any page you are not currently viewing, except the one case below: the *public* profile listing of the author of a post you clicked "analyse" on, (nothing is crawled or fetched in the background, and never for posts you did not click)
 
 The extension requests the `storage` permission and host access to `https://www.reddit.com/*` (needed for the author-history request) and `https://promolens-api.amaturos.workers.dev/*` (the PromoLens service); it runs only on `https://www.reddit.com/*`. Access to `https://api.openai.com/*` is optional and requested only when you save your own key.
 
 ## Does information leave the browser?
 
-**Deeper analysis off:** no. Analysis runs in the page when you click. Results are cached inside Chrome's extension storage on your device.
+**Before you click:** no. Results are cached inside Chrome's extension storage on your device.
 
-**Deeper analysis on (the default):** when you click the button, the background worker sends the fields listed above for that one post, plus the locally detected signals and a content hash, to the option you selected: *Included analyses* (the PromoLens service, see below), *Use my own OpenAI API key* (directly to OpenAI), or a local API server you run (developers). Nothing is sent for posts you do not click.
+**When you click the button:** the background worker sends the fields listed above for that one post, plus the locally detected signals and a content hash, to the option you selected: *Included analyses* (the PromoLens service, see below), *Use my own OpenAI API key* (directly to OpenAI), or a local API server you run (developers). Nothing is sent for posts you do not click.
 
 ## Included analyses and PromoLens Plus (hosted service)
 
@@ -53,7 +53,7 @@ PromoLens Plus is sold through Lemon Squeezy, which handles payment, invoices an
 
 ## Optional deeper analysis with your own API key
 
-If you switch on **Deeper analysis** and choose **Use my own OpenAI API key**, the extension itself sends the post you clicked (title, body, up to 20 visible comments, the author-history summary and the rule signals) to `api.openai.com` using your key, and receives quoted evidence back. Chrome asks you once for permission to contact that address; nothing is sent before you save a key.
+If you choose **Use my own OpenAI API key** in the popup, the extension itself sends the post you clicked (title, body, up to 20 visible comments, the author-history summary and the rule signals) to `api.openai.com` using your key, and receives quoted evidence back. Chrome asks you once for permission to contact that address; nothing is sent before you save a key.
 
 Your key is stored in this extension's storage on your device, is never sent anywhere except in the request to OpenAI, and can be removed by clearing the field or removing the extension. Usage is billed to your OpenAI account. OpenAI's own policies apply to what they receive; by default OpenAI does not train on API traffic. PromoLens has no server in this path and sees nothing.
 
@@ -69,9 +69,9 @@ The provider's own retention and training policies apply to what it receives; ch
 
 The extension never contains or receives the API key.
 
-## Author history check (on by default, one click, one author)
+## Author history check (one click, one author)
 
-When you click "analyse" on a post and **Check the author's public history** is on, the extension reads the author's recent public submissions and comments and their public account age/karma - the same pages anyone can open at `reddit.com/user/<name>` - using your own browser session. It keeps a compact summary (subreddit, title, outbound domain, a short excerpt, date) of up to 40 posts and 40 comments, uses it to check whether the same product recurs, and holds that summary **in the extension's worker memory only** for up to 6 hours per author - it is never written to disk, and it disappears when the browser or the extension's background worker stops. Evidence taken from another post is shown with the username and a link back to that post. If deeper analysis is on, the titles/excerpts summary is included in what goes to your local API and the model provider.
+When you click "analyse" on a post, the extension also reads the author's recent public submissions and comments and their public account age/karma - the same pages anyone can open at `reddit.com/user/<name>` - using your own browser session. It keeps a compact summary (subreddit, title, outbound domain, a short excerpt, date) of up to 40 posts and 40 comments, uses it to check whether the same product recurs, and holds that summary **in the extension's worker memory only** for up to 6 hours per author - it is never written to disk, and it disappears when the browser or the extension's background worker stops. Evidence taken from another post is shown with the username and a link back to that post. If deeper analysis is on, the titles/excerpts summary is included in what goes to your local API and the model provider.
 
 It does not read private messages, saved items, hidden or removed content, or anything not publicly visible. It never fetches a profile for a post you did not click, and never fetches profiles of commenters. Switch the toggle off in the popup to stop it; the engine then reports "author history not checked" and keeps confidence lower.
 
@@ -89,7 +89,7 @@ Clicking the button on a feed card fetches that one post's public content (title
 
 ## How to turn PromoLens off
 
-There is no automatic scanning. To remove the button entirely, click the PromoLens toolbar icon and switch off **Show PromoLens on post pages**. To stop any data leaving the browser, switch off **Deeper analysis**. You can also disable or remove the extension from `chrome://extensions`.
+There is no automatic scanning. To remove the button entirely, click the PromoLens toolbar icon and switch off **Show PromoLens on post pages**. You can also disable or remove the extension from `chrome://extensions`.
 
 ## Requesting deletion
 

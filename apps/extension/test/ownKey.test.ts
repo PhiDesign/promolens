@@ -16,13 +16,12 @@ function fakeOpenAi(reply: string, status = 200): { fetchFn: typeof fetch; calls
 }
 
 describe("own-key mode", () => {
-  const settings: Settings = { ...DEFAULT_SETTINGS, apiEnabled: true, aiProvider: "own-key", ownKey: "sk-test-1234", ownModel: "gpt-5-mini" };
+  const settings: Settings = { ...DEFAULT_SETTINGS, aiProvider: "own-key", ownKey: "sk-test-1234", ownModel: "gpt-5-mini" };
 
   it("is ready only when enabled, selected and a key is present", () => {
     expect(ownKeyReady(settings)).toBe(true);
     expect(ownKeyReady({ ...settings, ownKey: "  " })).toBe(false);
     expect(ownKeyReady({ ...settings, aiProvider: "local-api" })).toBe(false);
-    expect(ownKeyReady({ ...settings, apiEnabled: false })).toBe(false);
   });
 
   it("runs the witness against api.openai.com with the user's key and returns a valid, model-marked result", async () => {

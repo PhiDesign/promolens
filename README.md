@@ -10,9 +10,9 @@ PromoLens is a desktop Chrome extension that, **when you ask it to**, estimates 
 
 PromoLens never analyses anything on its own. A small gray **?** button sits in the header of each post - on the post page and, if you keep the option on, on feed cards too. Click it (or focus it and press Enter) and PromoLens analyses that post. On a feed card it first fetches the post in the background (full body, links, top comments), so you can decide whether the post is worth opening without leaving the feed. Either way the analysis is:
 
-1. **Author history** (on by default): the author's recent *public* posts and comments are read - the same pages you could open yourself - to see whether the same product keeps coming back, whether a near-identical post was published elsewhere, and whether the author has said "my app" / "I'm the founder" somewhere else.
+1. **Author history**: the author's recent *public* posts and comments are read - the same pages you could open yourself - to see whether the same product keeps coming back, whether a near-identical post was published elsewhere, and whether the author has said "my app" / "I'm the founder" somewhere else.
 2. **Rule engine**: scores the post plus that history in the browser, in milliseconds.
-3. **Deeper analysis (on by default)**: the post and the history summary go to the PromoLens service, to OpenAI with your own key, or to a local API you run, where a language model adds quoted evidence - including its own observations outside the named criteria, capped so they can never dominate - and the rule engine produces the final number. With deeper analysis on, the ring shows one result, not a preliminary score that later changes.
+3. **Language model**: the post and the history summary go to the PromoLens service, to OpenAI with your own key, or to a local API you run, where a language model adds quoted evidence - including its own observations outside the named criteria, capped so they can never dominate - and the rule engine produces the final number. With deeper analysis on, the ring shows one result, not a preliminary score that later changes.
 
 Hover, focus, or click the ring to see a compact evidence card:
 
@@ -65,7 +65,7 @@ Then load the extension:
 4. Select the folder `apps/extension/dist` inside this repository.
 5. Open any post on <https://www.reddit.com/> - a gray **?** appears beside its title. Click it.
 
-Click the PromoLens toolbar icon to hide the button, enable deeper analysis, or clear cached results.
+Click the PromoLens toolbar icon to hide the button, choose where the model runs, or clear cached results.
 
 ### Optional: run the local analysis API
 
@@ -76,7 +76,7 @@ cp .env.example apps/api/.env   # optional; defaults are fine
 npm run dev:api                 # http://127.0.0.1:8787
 ```
 
-In the toolbar popup, enable **Deeper analysis (language model)**, then click **Check connection**. If the API is unavailable or returns something malformed, the extension keeps the local rule-based result.
+In the toolbar popup, choose the local API option (see docs/testing.md), then click **Check connection**. If the API is unavailable or returns something malformed, the extension keeps the local rule-based result.
 
 Never put a provider key in the extension. Provider secrets belong only in `apps/api/.env`, which Git ignores.
 
@@ -136,9 +136,9 @@ promolens/
 
 See [docs/architecture.md](docs/architecture.md) for details and the exact rules.
 
-### Optional: deeper analysis with a language model
+### Where the language model runs
 
-Out of the box, **Deeper analysis** is on and uses **Included analyses** through the hosted PromoLens service: 20 analyses to start, then 5 a month, or 500 a month with PromoLens Plus ($4.99/month). For unlimited use with no subscription, choose **Use my own OpenAI API key** in the popup, paste a key from platform.openai.com/api-keys and click **Save and test key**. Chrome asks once for permission to contact api.openai.com. From then on each click also sends that post to the model, which adds quoted evidence; the rule engine still computes the score. Cost is billed to your OpenAI account - roughly half a cent per post with `gpt-5-mini`.
+Out of the box, every click uses **Included analyses** through the hosted PromoLens service: 20 analyses to start, then 5 a month, or 500 a month with PromoLens Plus ($4.99/month). For unlimited use with no subscription, choose **Use my own OpenAI API key** in the popup, paste a key from platform.openai.com/api-keys and click **Save and test key**. Chrome asks once for permission to contact api.openai.com. From then on each click also sends that post to the model, which adds quoted evidence; the rule engine still computes the score. Cost is billed to your OpenAI account - roughly half a cent per post with `gpt-5-mini`.
 
 Developers who want to run the model behind their own API (for the evaluation harness, other providers, or a shared server) can use the local API instead:
 
@@ -150,7 +150,7 @@ Developers who want to run the model behind their own API (for the evaluation ha
    LLM_MODEL=<model id exactly as shown in your provider dashboard>
    ```
 3. Start the API: `npm run dev:api`. The startup line shows the provider and model.
-4. In the extension popup switch on **Deeper analysis (language model)** and click **Check connection** - it should report the provider as `openai:<model>`.
+4. In the extension popup select the local API option and click **Check connection** - it should report the provider as `openai:<model>`.
 
 From then on, clicking the **?** on a post page sends that post (and only that post) to your API; results are cached for 24 h by content hash. Expect 10-40 s per post with a large model (the prompt includes the post, comments and author history); a "mini" model answers in a few seconds. If the model exceeds `LLM_TIMEOUT_MS` (45 s by default) the API answers 502 and the ring shows the local result. If the model call fails or returns something malformed, the ring keeps the local rule-based score. Read `docs/privacy.md` before enabling: the text of posts you analyse leaves your machine for the model provider.
 
@@ -171,7 +171,7 @@ To compare rules-only, rules + model witness, and model-only scoring on labelled
 
 ## Privacy
 
-Nothing is analysed or sent until you click the button on a post page. By default the analysis runs entirely in your browser. With deeper analysis enabled, the visible text and comments of *that one post* go to the API server you run, and from there to your configured model provider. No accounts, no analytics, no data selling, no model training. Cached results are keyed by a content hash and expire after 24 hours. Full details: [docs/privacy.md](docs/privacy.md).
+Nothing is analysed or sent until you click the button on a post page. Each click runs the rules in your browser and sends the visible text and comments of *that one post* go to the API server you run, and from there to your configured model provider. No accounts, no analytics, no data selling, no model training. Cached results are keyed by a content hash and expire after 24 hours. Full details: [docs/privacy.md](docs/privacy.md).
 
 ## Safety boundaries
 

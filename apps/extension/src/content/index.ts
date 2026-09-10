@@ -69,7 +69,7 @@ class PromoLens {
 
   applySettings(next: Settings): void {
     const wasEnabled = this.settings.enabled;
-    const apiChanged = next.apiEnabled !== this.settings.apiEnabled || next.apiBaseUrl !== this.settings.apiBaseUrl;
+    const apiChanged = next.aiProvider !== this.settings.aiProvider || next.apiBaseUrl !== this.settings.apiBaseUrl;
     const feedChanged = next.feedEnabled !== this.settings.feedEnabled;
     this.settings = next;
     if (wasEnabled && !next.enabled) this.stop();
@@ -95,7 +95,7 @@ class PromoLens {
     if (record.status === "queued" || record.status === "analyzing") return;
     if (record.status === "done" && record.ring.result) return; // ring handles showing the result
     record.status = "queued";
-    debug("analyse requested", record.key, { deeper: this.settings.apiEnabled });
+    debug("analyse requested", record.key, { provider: this.settings.aiProvider });
     this.queue.enqueue(record.key, (token) => analyzeRecord(record, this.settings, token), 0);
   }
 
@@ -119,7 +119,7 @@ class PromoLens {
 async function main(): Promise<void> {
   if (window.top !== window) return; // ignore iframes
   const settings = await loadSettings();
-  debug("starting", { enabled: settings.enabled, deeper: settings.apiEnabled, url: location.pathname });
+  debug("starting", { enabled: settings.enabled, provider: settings.aiProvider, url: location.pathname });
   const app = new PromoLens(settings);
   app.start();
   onSettingsChanged((next) => app.applySettings(next));

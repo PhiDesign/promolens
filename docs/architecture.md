@@ -42,7 +42,7 @@ This document explains how PromoLens works, written for someone who is new to br
 5. **Hash.** `hashPostContent` hashes the fields that affect analysis (not votes), including a fingerprint of the history summary. This key drives every cache.
 6. **Local score.** `analyzePost` runs the detectors and the scoring engine synchronously - a few milliseconds - and the ring updates right away. This never waits on the background worker.
 7. **Cache lookup.** The content script asks the worker (`CACHE_GET`, 1.5 s timeout). A hit that came from the API replaces the local result; otherwise the local result is stored (`CACHE_PUT`).
-8. **Deeper analysis (optional).** If enabled, the worker sends the post to `POST /api/v1/analyze` (at most two in flight globally, 25 s timeout), validates the response against the shared schema, caches it, and the ring updates again. The popover footer says whether the result is "Local rules only" or "Rules + language model". Any failure leaves the local result in place.
+8. **Language model.** The worker sends the post to `POST /api/v1/analyze` (at most two in flight globally, 25 s timeout), validates the response against the shared schema, caches it, and the ring updates again. The popover footer says whether the result is "Local rules only" or "Rules + language model". Any failure leaves the local result in place.
 9. **Cleanup.** Navigating away cancels queued work, hides the popover and removes the button.
 
 ## Where Reddit-specific code lives
@@ -132,7 +132,7 @@ The technique line is picked from the signals in priority order: hidden connecti
 | --- | --- | --- |
 | `CACHE_GET {hash}` | content -> worker | look up a cached result |
 | `CACHE_PUT {hash, result}` | content -> worker | store a local result |
-| `ENRICH {hash, post, localSignals}` | content -> worker | ask the local API (if enabled) |
+| `ENRICH {hash, post, localSignals}` | content -> worker | ask the model provider |
 | `CACHE_CLEAR` | popup -> worker | delete every cached result |
 | `API_HEALTH {baseUrl?}` | popup -> worker | connection check |
 

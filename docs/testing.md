@@ -62,8 +62,8 @@ Build (`npm run build`), load `apps/extension/dist` unpacked, then walk through:
 - [ ] Open any post: a gray dashed **?** appears beside the `<h1>` title within ~1 s; related posts further down get nothing.
 - [ ] Hover the **?**: a card explains what clicking does; move away: it closes.
 - [ ] Click (or Tab to it and press Enter): the ring animates, then shows a colour and number within ~1 s (local rules).
-- [ ] With deeper analysis on and the API running: the ring updates again within a few seconds; the popover footer reads "Rules + language model (...)".
-- [ ] With deeper analysis off: footer reads "Local rules only."
+- [ ] With the API running: the ring updates again within a few seconds; the popover footer reads "Rules + language model (...)".
+- [ ] With the API stopped: footer reads "Local rules" and the card carries a "not applied" note.
 - [ ] Reload the page and click again: result appears immediately (cache).
 
 ### Client-side navigation
@@ -90,7 +90,7 @@ Build (`npm run build`), load `apps/extension/dist` unpacked, then walk through:
 - [ ] A post with an undisclosed product link + call to action shows a red ring and "Connection not disclosed".
 
 ### API unavailable
-- [ ] Enable **Deeper analysis** in the popup with no server running: clicking the button still shows the local result; nothing hangs; popup "Check connection" reports failure.
+- [ ] With no server running: clicking the button still shows the local result; nothing hangs; popup "Check connection" reports failure.
 - [ ] Start `npm run dev:api`, click **Check connection**: reports connected (provider: mock).
 
 ### Malformed API response
@@ -102,10 +102,10 @@ Build (`npm run build`), load `apps/extension/dist` unpacked, then walk through:
 - [ ] Clear cached results: popup reports the count; next analysis of the same post recomputes.
 
 ### Author history
-- [ ] With **Check the author's public history** on, click the button on a post by an active author: the API log / popover reasons mention "other recent posts" or "communities" when the product recurs; a genuine account shows no such reason.
+- [ ] Click the button on a post by an active author: the API log / popover reasons mention "other recent posts" or "communities" when the product recurs; a genuine account shows no such reason.
 - [ ] A post by a deleted or suspended author: analysis still completes; confidence is low; no error ring.
 - [ ] Click a second post by the same author within 6 hours: no new profile request (cached).
-- [ ] Switch the toggle off: the next analysis reports history not checked (visible in the API log as `history: unavailable (history check is turned off)`).
+- [ ] Log out of Reddit and click: the analysis reports history unavailable instead of failing.
 - [ ] Popup **Clear cached results** also clears cached histories.
 
 ### Developer: route deeper analysis through a local API server

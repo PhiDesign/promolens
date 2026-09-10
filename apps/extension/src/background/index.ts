@@ -174,11 +174,6 @@ async function handle(message: Message): Promise<unknown> {
       return response;
     }
     case "HISTORY_GET": {
-      const settings = await loadSettings();
-      if (!settings.historyEnabled) {
-        const response: HistoryResponse = { ok: false, reason: "disabled" };
-        return response;
-      }
       const author = message.author.trim();
       const cachedHistory = await historyCache.get(author);
       if (cachedHistory) {
@@ -204,10 +199,6 @@ async function handle(message: Message): Promise<unknown> {
     }
     case "ENRICH": {
       const settings = await loadSettings();
-      if (!settings.apiEnabled) {
-        const response: EnrichResponse = { ok: false, reason: "api_disabled" };
-        return response;
-      }
       // A model call can take 10-40 s. Chrome may stop an idle service worker
       // after ~30 s; touching an extension API resets that timer, so ping
       // while the request is in flight (standard MV3 keep-alive).
