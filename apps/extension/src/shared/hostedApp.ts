@@ -4,7 +4,7 @@
  * HOSTED_API_URL is the deployed copy of apps/api with QUOTA_ENABLED=true.
  * While it is empty, the popup offers only "use my own key".
  */
-export const HOSTED_API_URL = "https://promolens.onrender.com";
+export const HOSTED_API_URL = "https://promolens-api.amaturos.workers.dev";
 
 /** Lemon Squeezy checkout for PromoLens Plus (public link; safe to ship). */
 export const PLUS_CHECKOUT_URL = "https://promolens.lemonsqueezy.com/checkout/buy/0a4792a6-7f97-413a-af9b-dbdfc613ea25";

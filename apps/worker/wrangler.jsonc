@@ -22,5 +22,5 @@
     "LOG_RAW_CONTENT": "false"
   },
   // Usage counts per anonymous install id. Create with: npx wrangler kv namespace create USAGE
-  "kv_namespaces": [{ "binding": "USAGE", "id": "REPLACE_WITH_NAMESPACE_ID" }]
+  "kv_namespaces": [{ "binding": "USAGE", "id": "547014ffc07542c392be4d7170cb1737" }]
 }

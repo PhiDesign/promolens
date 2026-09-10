@@ -37,7 +37,7 @@ Additionally:
 - your browsing history, cookies, or other websites
 - any page you are not currently viewing, except the one case below: the *public* profile listing of the author of a post you clicked "analyse" on, when the history check is on (nothing is crawled or fetched in the background, and never for posts you did not click)
 
-The extension requests the `storage` permission and host access to `https://www.reddit.com/*` (needed for the author-history request) and `https://promolens.onrender.com/*` (the PromoLens service); it runs only on `https://www.reddit.com/*`. Access to `https://api.openai.com/*` is optional and requested only when you save your own key.
+The extension requests the `storage` permission and host access to `https://www.reddit.com/*` (needed for the author-history request) and `https://promolens-api.amaturos.workers.dev/*` (the PromoLens service); it runs only on `https://www.reddit.com/*`. Access to `https://api.openai.com/*` is optional and requested only when you save your own key.
 
 ## Does information leave the browser?
 

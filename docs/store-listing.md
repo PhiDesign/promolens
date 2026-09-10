@@ -73,7 +73,7 @@ Estimate, on the user's request, whether the Reddit post they are looking at is 
   ```
   The extension runs only on reddit.com: it reads the post the user opened and inserts the PromoLens button and evidence card. When the user clicks the button, it may also read the author's public profile pages and, for feed cards, that post's page, using the user's own session. Nothing is read without a click.
   ```
-- Host permission `https://promolens.onrender.com/*`:
+- Host permission `https://promolens-api.amaturos.workers.dev/*`:
   ```
   The PromoLens service that provides the included deeper analyses and PromoLens Plus. When the user clicks the button with deeper analysis on, the extension sends that one post to this service, which forwards it to a language model and returns quoted evidence. Also used to show how many analyses are left and to activate a licence key. Requests carry only an anonymous install id; no post text is stored.
   ```

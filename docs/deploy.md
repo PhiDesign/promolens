@@ -1,6 +1,6 @@
 # Deploying the hosted PromoLens API
 
-This is the server behind "included analyses" and PromoLens Plus. It is the same `apps/api` you run locally, started with `QUOTA_ENABLED=true` and your own model key. One small instance is plenty: each analysis is one model call; the server holds no post content beyond a 24-hour in-memory cache keyed by hash, plus a tiny usage file.
+This is the server behind "included analyses" and PromoLens Plus. It runs today as a Cloudflare Worker (free plan; see "Cloudflare Workers" below); the Render section is kept for anyone who prefers a plain Node host. It is the same `apps/api` you run locally, started with `QUOTA_ENABLED=true` and your own model key. One small instance is plenty: each analysis is one model call; the server holds no post content beyond a 24-hour in-memory cache keyed by hash, plus a tiny usage file.
 
 ## What it needs
 
@@ -19,7 +19,7 @@ This is the server behind "included analyses" and PromoLens Plus. It is the same
 
 Run command: `npm run start --workspace=apps/api` after `npm ci --include=dev && npm run build --workspace=apps/api` (the build bundles the server into `apps/api/dist/server.js`). The server binds to `0.0.0.0` automatically when `RENDER` or `FLY_APP_NAME` is set, or when `HOST` is given; locally it stays on `127.0.0.1`.
 
-## Render (recommended for a first deployment)
+## Render (alternative: a paid always-on Node instance)
 
 1. Sign in at <https://dashboard.render.com> with GitHub and allow it to see the `PhiDesign/promolens` repository.
 2. **New → Web Service** → pick the repository. Settings:
