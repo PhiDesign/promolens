@@ -18,7 +18,7 @@
     "FREE_INITIAL": "20",
     "FREE_MONTHLY": "5",
     "PLUS_MONTHLY": "500",
-    "ALLOWED_ORIGINS": "chrome-extension://*",
+    "ALLOWED_ORIGINS": "chrome-extension://amobiefndkakjgnaidfghnppacfmofbb",
     "LOG_RAW_CONTENT": "false"
   },
   // Usage counts per anonymous install id. Create with: npx wrangler kv namespace create USAGE

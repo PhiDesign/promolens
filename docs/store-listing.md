@@ -103,5 +103,5 @@ https://phidesign.github.io/promolens/privacy
 
 - Update the redirect URI in any future Reddit app registration to the store's permanent extension ID.
 - Tag the release: `git tag v0.5.0 && git push --tags`.
-- On Render, set `ALLOWED_ORIGINS` to `chrome-extension://<the store extension id>` once the id is known.
+- On Render, set `ALLOWED_ORIGINS` to `chrome-extension://amobiefndkakjgnaidfghnppacfmofbb` (done) once the id is known.
 - Add the store link to the README and the docs site.
