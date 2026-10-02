@@ -1,0 +1,17 @@
+{
+  "name": "@promolens/site",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PromoLens marketing, pricing, and policy website.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "verify": "node scripts/verify.mjs",
+    "dev": "npm run build && wrangler dev --config wrangler.jsonc",
+    "deploy": "wrangler deploy --config wrangler.jsonc",
+    "preview": "wrangler versions upload --config wrangler.jsonc"
+  },
+  "devDependencies": {
+    "wrangler": "^4.35.0"
+  }
+}

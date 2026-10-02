@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://promolens.amadoso.com/sitemap.xml
